@@ -6,11 +6,11 @@ sidebarTitle: Manage environments
 description: Learn what environments on Platform.sh are and how to take advantage of them.
 ---
 
-A Platform.sh environment contains one instance of an app (or [group of apps](../create-apps/multi-app.md))
+A Platform.sh environment contains one instance of an app (or [group of apps](../create-apps/multi-app/_index.md))
 with all the services needed for it to run.
 
 Each project can include multiple environments,
-often divided into [environment types](../administration/users.md#environment-types).
+often divided into [environment types](../administration/users.md#environment-type-roles).
 If you have a live site, you have at least a production environment.
 You can think of other environments as copies of your live site
 where you can run tests without worrying about damaging anything in production.
@@ -43,7 +43,7 @@ These are called [inactive environments](#environment-status).
 
 ## Default environment
 
-Your default environment comes from your default branch and is a [production environment](../administration/users.md#environment-types).
+Your default environment comes from your default branch and is a [production environment](../administration/users.md#environment-type-roles).
 Your project must have a default environment,
 but you can [name it as you want](./default-environment.md).
 
@@ -106,8 +106,8 @@ You can use child environments for development, staging, and testing.
 
 ### Workflows
 
-Since you can customize your [environment hierarchy](#hierarchy), you can create your own workflows. 
-You can decide which structure best fits your needs. 
+Since you can customize your [environment hierarchy](#hierarchy), you can create your own workflows.
+You can decide which structure best fits your needs.
 
 #### Possible approaches
 

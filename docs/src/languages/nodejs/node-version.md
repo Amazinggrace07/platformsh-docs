@@ -4,11 +4,15 @@ weight: 1
 description: See how to manage different Node.js versions in your Platform.sh containers."
 ---
 
-You may need to use a specific version of Node.js that isn't available in an app container for a different language.
-For example, a container might have a long-term support version, while you want the latest version.
+Each Platform.sh container image includes a specific language in a specific version.
+A set of dependencies is also provided based on that language version.
+This ensures that your application container is as small and efficient as possible.
 
-In such cases, use a version manager to install the specific version you want to use.
-You could use one of these:
+Therefore, by default, when you use a Platform.sh container image,
+you use the Node.js version that's included in that image, if any.
+
+If you want to use a different Node.js version, use a version manager to install it yourself.
+You can use one of the following version managers:
 
 - [Use `n`](#use-n)
 - [Use `nvm`](#use-nvm)
@@ -177,6 +181,18 @@ To use `nvm`, follow these steps:
            fi
            ln -s $PLATFORM_CACHE_DIR/.nvm $NVM_DIR
    ```
+
+   {{< note >}}
+
+   Instead of using a symlink between your cache and application directories,
+   you might need to copy the content of `$PLATFORM_CACHE_DIR/.nvm` into `$PLATFORM_APP_DIR/.nvm` manually.
+   To do so, run the following command:
+
+   ```bash
+   rsync -av $PLATFORM_CACHE_DIR/.nvm $PLATFORM_APP_DIR
+   ```
+
+   {{< /note >}}
 
 4. Use the cache directory and install based on the variables if not present:
 
