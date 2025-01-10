@@ -17,14 +17,13 @@ hooks:
     build: !include
         type: string
         path: build.sh
-    post_deploy: !include
-        type: string
-        path: post_deploy.sh
+    post_deploy:
+        bash ./post_deploy.sh
 
 web:
     commands:
       # Run the Meilisearch server
-      start: !include 
+      start: !include
             type: string
             path: start.sh
 
@@ -53,5 +52,3 @@ mounts:
     "dumps":
         source: local
         source_path: "dumps"
-
-size: L

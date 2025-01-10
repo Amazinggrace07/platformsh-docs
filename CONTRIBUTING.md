@@ -63,33 +63,6 @@ which means it contains buttons linking to all pages in its directory.
 To override this and include content from the `_index.md` file itself,
 set the `layout` to `single` in the [front matter](contributing/markup-format.md#front-matter).
 
-### Adding security reports
-
-To add a security transparency report for a new year (after receiving the data):
-
-1. Copy the tables from the previous year:
-
-   ```bash
-   cp -R docs/layouts/shortcodes/tranparency-reports/tables/2021 docs/layouts/shortcodes/tranparency-reports/tables/2022
-   ```
-
-1. Copy the template from the previous year:
-
-   ```bash
-   cp docs/src/security/transparency/2021_report.md docs/src/security/transparency/2022_report.md
-   ```
-
-1. Update instances of the year in the new `.md` file:
-
-   * In the front matter (`title`, `sidebarTitle`, and `file`)
-   * In all shortcodes
-1. Run the docs locally and navigate to the new page _using Firefox_.
-1. Print the page as a PDF and save in `docs/static/files/reports/transparency-abuse/`.
-
-   Save the file as `<YEAR>_platformsh_transparency_report.pdf` (replacing `<YEAR>` with the respective year).
-
-The report text is in `docs/data/transparency-reports.yaml`.
-
 ## Redirect pages
 
 You sometimes need to move pages around to new locations.
@@ -198,13 +171,11 @@ To ensure the docs work smoothly, a few checks run on each pull request:
   npm run build:search
   # Build HTML pages to check
   hugo
-  # Build production JavaScript and CSS files
-  npm run build:assets
   # Run the check
   ./bin/htmltest
   ```
 
-- Custom workflows [check all changed files](./.github/workflows/get-pr-info.yaml) within `docs/src`
+- Custom workflows [check all changed files](./.github/workflows/pr-url-and-dependent.yaml) within `docs/src`
   and [comment with links](./.github/workflows/comment-on-pr.yaml) to the deployed pages for review.
 
 Outside of pull requests, twice a week [Muffet](https://github.com/raviqqe/muffet)
