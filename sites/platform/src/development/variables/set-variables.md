@@ -11,7 +11,7 @@ All of the variables can also be [overridden via script](#set-variables-via-scri
 
 ## Set variables in your app
 
-Set variables [in code](../../create-apps/app-reference.md#variables) using the `.platform.app.yaml` file.
+Set variables [in code](/create-apps/app-reference/single-runtime-image.md#variables) using the `{{< vendor/configfile "app" >}}` file.
 These values are the same across all environments and present in the Git repository,
 which makes them a poor fit for API keys and other such secrets.
 
@@ -37,7 +37,7 @@ title=Using the CLI
 To add a project variable, run the following command:
 
 ```bash
-platform variable:create --level project --name {{< variable "VARIABLE_NAME" >}} --value {{< variable "VARIABLE_VALUE" >}}
+{{% vendor/cli %}} variable:create --level project --name {{< variable "VARIABLE_NAME" >}} --value {{< variable "VARIABLE_VALUE" >}}
 ```
 
 To specify other options, use the [flags for variable options](#variable-options).
@@ -79,14 +79,14 @@ So if you want the `foo` variable to be visible at build time but hidden during 
 you can set it by running the following command:
 
 ```bash
-platform variable:create --level project --name foo --value bar --visible-build true --visible-runtime false
+{{% vendor/cli %}} variable:create --level project --name foo --value bar --visible-build true --visible-runtime false
 ```
 
 You can also change the variable options after you create them (except for sensitive values, which can't be set to non-sensitive).
 For example, to make the `foo` variable visible at runtime and hidden during the build, run the following command:
 
 ```bash
-platform variable:update foo --visible-build false --visible-runtime true
+{{% vendor/cli %}} variable:update foo --visible-build false --visible-runtime true
 ```
 
 Note that for changes to project variables to have effect,
@@ -106,7 +106,7 @@ title=Using the CLI
 To create a variable for the current environment, run the following command:
 
 ```bash
-platform variable:create --level environment --name {{< variable "VARIABLE_NAME" >}} --value {{< variable "VARIABLE_VALUE" >}}
+{{% vendor/cli %}} variable:create --level environment --name {{< variable "VARIABLE_NAME" >}} --value {{< variable "VARIABLE_VALUE" >}}
 ```
 
 To specify the environment for the variable, use the `-e` flag to specify its name.
@@ -149,7 +149,7 @@ For example, to set a PayPal secret value for only the `main` branch and have it
 run the following command:
 
 ```bash
-platform variable:create -e main --name paypal_id --inheritable false --sensitive true
+{{% vendor/cli %}} variable:create -e main --name paypal_id --inheritable false --sensitive true
 ```
 
 Other environments don't inherit it and get either a project variable of the same name if it exists or no value at all.
@@ -160,17 +160,17 @@ To make the new value accessible to those environments, [trigger a redeploy](../
 
 ### Example environment variable
 
-Environment variables are a good place to store values that apply only on {{< vendor/name >}} and not on your local development environment.
+Environment variables are a good place to store values that apply only on {{% vendor/name %}} and not on your local development environment.
 This includes API credentials for third-party services, mode settings, and which server (development vs. production) to use.
 
 One example would be to define a Node.js application's build on a production branch (`NODE_ENV=production`),
-but use development mode (`NODE_ENV=development`) for each of your development environments.
+but use development mode (`NODE_ENV=development`) for each of your preview environments.
 Assuming you have a `main` environment for production and a `staging` environment with more child environments for development,
 run the following commands:
 
 ```bash
-platform variable:create -l environment -e main --prefix env: --name NODE_ENV --value production --visible-build true --inheritable false
-platform variable:create -l environment -e staging --prefix env: --name NODE_ENV --value development --visible-build true --inheritable true
+{{% vendor/cli %}} variable:create -l environment -e main --prefix env: --name NODE_ENV --value production --visible-build true --inheritable false
+{{% vendor/cli %}} variable:create -l environment -e staging --prefix env: --name NODE_ENV --value development --visible-build true --inheritable true
 ```
 
 Now `NODE_ENV` is `production` on the default branch but `development` on `staging` and each of its child environments.
@@ -179,7 +179,7 @@ value updates trigger a rebuild of the application in the same way that a commit
 
 ## Set variables via script
 
-You can also provide a `.environment` file as in [your app root](../../create-apps/app-reference.md#root-directory).
+You can also provide a `.environment` file as in [your app root](/create-apps/app-reference/single-runtime-image.md#root-directory).
 This file runs as a script in dash when the container starts and on all SSH logins.
 It can be used to set any environment variables directly, such as the PATH variable.
 
@@ -213,19 +213,20 @@ The following example looks for a `deploy/environment.tracker.txt` file.
 It displays a different message if it's found or not, which helps you track what variables are being set.
 
 ```bash {location=".environment"}
-if [ -f "deploy/environment.tracker.txt" ]; then 
+if [ -f "deploy/environment.tracker.txt" ]; then
     echo "File found."
     export DEPLOY='Friday'
 else
     echo "File not found."
     export DEPLOY='Never on a Friday'
+fi
 ```
 
 While sanity checks like this are useful during troubleshooting, you shouldn't include such commands in your final code.
 Because the `.environment` file is run at the start of an SSH session, the message is printed at the start of the session.
 
 Even when your SSH command executes successfully, you might later attempt to download data from one of your mounts,
-such as by using the CLI command `platform mount:download`.
+such as by using the CLI command `{{% vendor/cli %}} mount:download`.
 When you do, you see this error:
 
 ```bash
@@ -233,8 +234,8 @@ protocol version mismatch -- is your shell clean?
 (see the rsync man page for an explanation)
 rsync error: protocol incompatibility (code 2) at .../rsync/compat.c(61) [receiver=2.6.9]
 
-[ProcessFailedException]                                                                                                                      
-The command failed with the exit code: 2      
+[ProcessFailedException]
+The command failed with the exit code: 2
 ```
 
 This failure comes because `mount:download` and `rsync` don't expect output when the SSH connection is made.

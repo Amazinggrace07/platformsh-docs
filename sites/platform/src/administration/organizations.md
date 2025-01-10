@@ -1,13 +1,22 @@
 ---
 title: Organizations
 weight: -1
-description: See how to manage multiple {{< vendor/name >}} projects at once through organizations.
+description: See how to manage multiple {{% vendor/name %}} projects at once through organizations.
 ---
 
-Organizations allow you to manage your {{< vendor/name >}} projects, users, and billing.
+Organizations allow you to manage your {{% vendor/name %}} projects, users, and billing.
 You can group multiple projects in one organization and manage them together.
 
 To manage users within your organization, see how to [manage organization users](./users.md#manage-organization-users).
+
+<!-- {{% version/specific %}} -->
+<!-- To manage users within your organization, see how to [manage organization users](./users.md#manage-organization-users). -->
+<!-- <---> -->
+<!-- To manage users within your organization, you have two options: -->
+<!--  -->
+<!-- 1. [Managing users](./users.md#manage-organization-users) at an organization-wide or per-project basis - that is, individually. -->
+<!-- 1. [Managing users as a part of a team](/administration/teams.md). -->
+<!-- {{% /version/specific %}} -->
 
 ## Manage your organization settings
 
@@ -33,13 +42,13 @@ title=Using the CLI
 To change the name (URL) and label of the `acme` organization, run:
 
 ```bash
-platform organization:info --org acme label "Acme Corp" name acme-corp
+{{% vendor/cli %}} organization:info --org acme label "Acme Corp" name acme-corp
 ```
 
 To verify the changes, run:
 
 ```bash
-platform organization:info --org acme-corp
+{{% vendor/cli %}} organization:info --org acme-corp
 ```
 
 {{< /codetabs >}}
@@ -88,13 +97,13 @@ title=Using the CLI
 To create an organization with the label `Acme` and the name (URL) `acme`, run:
 
 ```bash
-platform organization:create --label "Acme" --name acme --country "United States"
+{{% vendor/cli %}} organization:create --label "Acme" --name acme --country "United States"
 ```
 
 To verify the changes, run:
 
 ```bash
-platform organization:info --org acme
+{{% vendor/cli %}} organization:info --org acme
 ```
 
 {{< /codetabs >}}
@@ -104,7 +113,7 @@ platform organization:info --org acme
 As an organization owner, you can delete your own organization.
 
 Note that if your organization owns projects or owes remaining invoices, you can not delete it yourself.
-To have it deleted, [contact support](../overview/get-support.md).
+To have it deleted, [contact support](/learn/overview/get-support.md).
 
 {{< codetabs >}}
 
@@ -126,7 +135,7 @@ title=Using the CLI
 To delete the organization `acme`, run:
 
 ```bash
-platform organization:delete --org acme
+{{% vendor/cli %}} organization:delete --org acme
 ```
 
 {{< /codetabs >}}
@@ -138,7 +147,7 @@ You have to be an organization owner or have the [manage plan permission](./user
 
 1. Make the new organization owner a [project admin](./users.md#)
    for the project you want to transfer.
-2. To ask for the transfer, from your organization account submit a [support ticket](https://console.platform.sh/-/users/~/tickets).
+2. To ask for the transfer, from your organization account open a [support ticket](/learn/overview/get-support).
 
 Once the transfer is completed, the new organization can administer all project settings and billing and receives future invoices.
 Ownership transfer automatically transfers subscription charges to the new organization.
@@ -147,4 +156,4 @@ Ownership transfer automatically transfers subscription charges to the new organ
 
 To transfer an organization to a different owner, first make sure that user is part of the organization.
 If they aren't yet, [add them](./users.md#add-a-user-to-an-organization).
-Then submit a [support ticket](https://console.platform.sh/-/users/~/tickets) from the current organization to ask for the transfer.
+Then open a [support ticket](/learn/overview/get-support) from the current organization to ask for the transfer.

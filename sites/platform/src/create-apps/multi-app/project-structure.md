@@ -4,6 +4,7 @@ weight: 10
 description: Explore possible code structures you can apply to your multiple application projects.
 banner:
    title: Feature availability
+   type: tiered-feature
    body: This page applies to Grid and {{% names/dedicated-gen-3 %}} projects. To ensure you have enough resources to support multiple apps, you need at least a [{{< partial "plans/multiapp-plan-name" >}} plan](/administration/pricing/_index.md#multiple-apps-in-a-single-project). To set up multiple apps on {{% names/dedicated-gen-2 %}} environments, [contact Sales](https://platform.sh/contact/).
 ---
 
@@ -26,17 +27,17 @@ Here are some example use cases and potential ways to organize the project:
 ## Unified app configuration
 
 You can configure all your apps from a single file.
-To do so, create an `applications.yaml` file within the `.platform` directory and define each app as a key.
+To do so, create a `{{< vendor/configfile "apps" >}}` and define each app as a key.
 
 For example, if you have an API Platform backend with a Symfony API,
 a Mercure Rocks server, and a Gatsby frontend,
 you can organize your repository like this:
 
 ```txt
-├── .platform
-│   ├── applications.yaml   <- Unified app configuration
-│   ├── routes.yaml
-│   └── services.yaml
+├── {{% vendor/configdir %}}
+│   ├── {{% vendor/configfile "apps" "strip" %}}   <- Unified app configuration
+│   ├── {{% vendor/configfile "routes" "strip" %}}
+│   └── {{% vendor/configfile "services" "strip" %}}
 ├── admin
 │   └── ...                 <- API Platform Admin app code
 ├── api-app
@@ -55,7 +56,7 @@ They all have different configurations for how they serve the files. For more de
 
 {{< note >}}
 
-The `.platform` directory is located at the root, separate from your apps.
+The `{{% vendor/configdir %}}` directory is located at the root, separate from your apps.
 It contains all the needed configuration files to set up the routing, services and behavior of each app.
 Since the code bases of your apps live in a different directory,
 you need to [change the source root of each app](#change-the-source-root-of-your-app).
@@ -72,12 +73,14 @@ the build image for your other apps can still be reused.
 
 Once your repository is organized, you can use a configuration similar to the following:
 
-```yaml {location=".platform/applications.yaml"}
+```yaml {configFile="apps"}
 api:
   type: php:8.2
 
   relationships:
-    database: "database:postgresql"
+    database:
+      service: "database"
+      endpoint: "postgresql"
 
   mounts:
     "/var/cache": "shared:files/cache"
@@ -211,23 +214,23 @@ But the Java app (`languagetool`) doesn't require updating when the Python app (
 In that case, you can nest the Java app within the Python app:
 
 ```txt
-├── .platform
-│   ├── applications.yaml
-│   └── routes.yaml
+├── {{% vendor/configdir %}}
+│   ├── {{% vendor/configfile "apps" "strip" %}}
+│   └── {{% vendor/configfile "routes" %}}
 ├── languagetool
 │   └── main.java           <- Java app code
 └── main.py                 <- Python app code
 ```
 
-The Python app's code base includes all of the files at the top level (excluding the `.platform` directory)
+The Python app's code base includes all of the files at the top level (excluding the `{{% vendor/configdir %}}` directory)
 *and* all of the files within the `languagetool` directory.
 The Java app's code base includes only the files within the `languagetool` directory.
 
-In this case, your `applications.yaml` file must contain 2 entries, one for the `main` app and second one for the `languagetool` app.
+In this case, your `{{< vendor/configfile "apps" >}}` file must contain 2 entries, one for the `main` app and second one for the `languagetool` app.
 
 {{< note >}}
 
-The `.platform` directory is located at the root, separate from your apps.
+The `{{% vendor/configdir %}}` directory is located at the root, separate from your apps.
 It contains all the needed configuration files to set up the routing, services and behavior of each app.
 Since the code base of the `languagetool` app lives in a different directory (`languagetool/`),
 you need to [change the source root](#change-the-source-root-of-your-app) of the `languagetool` app.
@@ -236,11 +239,12 @@ you need to [change the source root](#change-the-source-root-of-your-app) of the
 
 Once your repository is organized, you can use a configuration similar to the following:
 
-```yaml
-# .platform/applications.yaml
+
+```yaml {configFile="apps"}
 main:
   type: 'python:3.11'
   ...
+
 languagetool:
   type: 'java:17'
   source:
@@ -256,14 +260,14 @@ Then you can build them together in another repository using [Git submodules](ht
 
 With this setup, your apps are kept separate from the top application.
 Each app has its own [Git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) containing its code base.
-All your apps are configured in a single `.platform/applications.yaml` file.
+All your apps are configured in a single `{{< vendor/configfile "apps" >}}` file.
 So you could organize your [project repository](https://github.com/platformsh-templates/bigfoot-multiapp/tree/submodules-root-app-yaml) like this:
 
 ```text
-├── .platform
-│   ├── applications.yaml
-│   ├── routes.yaml
-│   └── services.yaml
+├── {{% vendor/configdir %}}
+│   ├── {{% vendor/configfile "apps" "strip" %}}
+│   ├── {{% vendor/configfile "routes" "strip" %}}
+│   └── {{% vendor/configfile "services" "strip" %}}
 ├── @admin      <-- API Platform Admin submodule
 ├── @api        <-- Bigfoot submodule
 ├── @gatsby     <-- Gatsby submodule
@@ -300,7 +304,7 @@ make sure you [change the source root](#change-the-source-root-of-your-app) for 
 ## Change the source root of your app
 
 When your app's code base and configuration file aren't located at the same directory level in your project repository,
-you need to [define a root directory](../app-reference.md#root-directory) for your app.
+you need to [define a root directory](/create-apps/app-reference/single-runtime-image.md#root-directory) for your app.
 
 To do so, add a new `source.root` property in your app configuration.
 
@@ -308,12 +312,13 @@ For example, to change the source root of the `admin` app
 from the [unified app configuration](#unified-app-configuration) example project,
 you could add the following configuration:
 
-```yaml {location=".platform/applications.yaml"}
-source:
+```yaml {configFile="apps"}
+admin:
+  source:
     root: admin
 ```
 
 The `source.root` path is relative to the repository root.
 In this example, the `admin` app now treats the `admin` directory as its root when building.
 
-If `source.root` isn't specified, it defaults to the same directory as the `.platform/applications.yaml` (or `.platform.app.yaml`) file itself.
+If `source.root` isn't specified, it defaults to the same directory as the `{{< vendor/configfile "apps" >}}` (or `{{< vendor/configfile "app" >}}`) file itself.

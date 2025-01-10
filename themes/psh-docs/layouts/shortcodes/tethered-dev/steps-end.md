@@ -1,5 +1,7 @@
+<!-- shortcode start {{ .Name }} -->
 1.  When you've finished your work, close the tunnels to your services by running the following command:
 
     ```bash
-    platform tunnel:close --all -y
+    {{ `{{< vendor/cli >}}` | .Page.RenderString }} tunnel:close --all -y
     ```
+<!-- shortcode end {{ .Name }} -->

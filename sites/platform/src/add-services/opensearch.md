@@ -6,7 +6,7 @@ description: |
 sidebarTitle: "OpenSearch"
 ---
 
-{{% description %}}
+OpenSearch is a distributed RESTful search engine built for the cloud.
 
 See the [OpenSearch documentation](https://opensearch.org/docs/latest/) for more information.
 
@@ -17,22 +17,275 @@ To switch from Elasticsearch, follow the same procedure as for [upgrading](#upgr
 <!--
 To update the versions in this table, use docs/data/registry.json
 -->
-| Grid | {{% names/dedicated-gen-3 %}} | {{% names/dedicated-gen-2 %}} |
-|------|-------------------------------|------------------------------ |
-|  {{< image-versions image="opensearch" status="supported" environment="grid" >}} | {{< image-versions image="opensearch" status="supported" environment="dedicated-gen-3" >}} | {{< image-versions image="opensearch" status="supported" environment="dedicated-gen-2" >}} |
+
+<!-- vale on -->
+<table>
+    <thead>
+        <tr>
+            <th>Grid</th>
+            <th>Dedicated Gen 3</th>
+            <th>Dedicated Gen 2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{< image-versions image="opensearch" status="supported" environment="grid" >}}</td>
+            <td>{{< image-versions image="opensearch" status="supported" environment="dedicated-gen-3" >}}</td>
+            <td>{{< image-versions image="opensearch" status="supported" environment="dedicated-gen-2" >}}</thd>
+        </tr>
+    </tbody>
+</table>
+<!-- vale off -->
 
 On Grid and {{% names/dedicated-gen-3 %}}, from version 2, you only specify the major version.
-The latest compatible minor version and patches are applied automatically.
+The latest compatible minor version and patches are applied automatically. On Grid, version 1 represents a rolling release - the latest minor version available from the upstream (starting with opensearch 1.3).
 
-{{% relationship-ref-intro %}}
+You can see the latest minor and patch versions of OpenSearch available from the [`2.x`](https://opensearch.org/lines/2x.html) and [`1.x`](https://opensearch.org/lines/1x.html) release lines.
 
-{{% service-values-change %}}
+## Deprecated versions
 
-{{< relationship "opensearch" >}}
+The following versions are still available in your projects,
+but they're at their end of life and are no longer receiving security updates from upstream,
+or are no longer the recommended way to configure the service on {{% vendor/name %}}.
+
+<table>
+    <thead>
+        <tr>
+            <th>Grid</th>
+            <th>Dedicated Gen 3</th>
+            <th>Dedicated Gen 2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{< image-versions image="opensearch" status="deprecated" environment="grid" >}}</td>
+            <td>{{< image-versions image="opensearch" status="deprecated" environment="dedicated-gen-3" >}}</td>
+            <td>{{< image-versions image="opensearch" status="deprecated" environment="dedicated-gen-2" >}}</thd>
+        </tr>
+    </tbody>
+</table>
+
+To ensure your project remains stable in the future,
+switch to [a supported version](#supported-versions).
+
+## Relationship reference
+
+Example information available through the [`{{% vendor/prefix %}}_RELATIONSHIPS` environment variable](/development/variables/use-variables.md#use-provided-variables)
+or by running `{{% vendor/cli %}} relationships`.
+
+Note that the information about the relationship can change when an app is redeployed or restarted or the relationship is changed.
+So your apps should only rely on the `{{% vendor/prefix %}}_RELATIONSHIPS` environment variable directly rather than hard coding any values.
+
+```json
+{
+  "username": null,
+  "scheme": "http",
+  "service": "opensearch",
+  "fragment": null,
+  "ip": "169.254.99.100",
+  "hostname": "azertyuiopqsdfghjklm.opensearch.service._.eu-1.{{< vendor/urlraw "hostname" >}}",
+  "port": 9200,
+  "cluster": "azertyuiopqsdf-main-7rqtwti",
+  "host": "opensearch.internal",
+  "rel": "opensearch",
+  "path": null,
+  "query": [],
+  "password": "ChangeMe",
+  "type": "opensearch:{{% latest "opensearch" %}}",
+  "public": false,
+  "host_mapped": false
+}
+```
 
 ## Usage example
 
-{{% endpoint-description type="opensearch" noApp=true /%}}
+### 1. Configure the service
+
+To define the service, use the `opensearch` type:
+
+```yaml {configFile="services"}
+# The name of the service container. Must be unique within a project.
+<SERVICE_NAME>:
+  type: opensearch:<VERSION>
+  disk: 256
+```
+
+Note that changing the name of the service replaces it with a brand new service and all existing data is lost.
+Back up your data before changing the service.
+
+### 2. Define the relationship
+
+To define the relationship, use the following configuration:
+
+{{< codetabs >}}
+
++++
+title=Using default endpoints
++++
+
+```yaml {configFile="app"}
+# Relationships enable access from this app to a given service.
+# The example below shows simplified configuration leveraging a default service
+# (identified from the relationship name) and a default endpoint.
+# See the Application reference for all options for defining relationships and endpoints.
+relationships:
+  <SERVICE_NAME>:
+```
+
+You can define `<SERVICE_NAME>` as you like, so long as it's unique between all defined services
+and matches in both the application and services configuration.
+
+The example above leverages [default endpoint](/create-apps/app-reference/single-runtime-image#relationships) configuration for relationships.
+That is, it uses default endpoints behind-the-scenes, providing a [relationship](/create-apps/app-reference/single-runtime-image#relationships)
+(the network address a service is accessible from) that is identical to the _name_ of that service.
+
+Depending on your needs, instead of default endpoint configuration,
+you can use [explicit endpoint configuration](/create-apps/app-reference/single-runtime-image#relationships).
+
+With the above definition, the application container now has [access to the service](#use-in-app) via the relationship `<SERVICE_NAME>` and its corresponding [`PLATFORM_RELATIONSHIPS` environment variable](/development/variables/use-variables.md#use-provided-variables).
+
+<--->
+
++++
+title=Using explicit endpoints
++++
+
+```yaml {configFile="app"}
+# Relationships enable access from this app to a given service.
+# The example below shows configuration with an explicitly set service name and endpoint.
+# See the Application reference for all options for defining relationships and endpoints.
+# Note that legacy definition of the relationship is still supported.
+# More information: https://docs.platform.sh/create-apps/app-reference/single-runtime-image.html#relationships
+relationships:
+  <RELATIONSHIP_NAME>:
+    service: <SERVICE_NAME>
+    endpoint: opensearch
+```
+
+You can define ``<SERVICE_NAME>`` and ``<RELATIONSHIP_NAME>`` as you like, so long as it's unique between all defined services and relationships
+and matches in both the application and services configuration.
+
+The example above leverages [explicit endpoint](/create-apps/app-reference/single-runtime-image#relationships) configuration for relationships.
+
+Depending on your needs, instead of explicit endpoint configuration,
+you can use [default endpoint configuration](/create-apps/app-reference/single-runtime-image#relationships).
+
+With the above definition, the application container now has [access to the service](#use-in-app) via the relationship `<RELATIONSHIP_NAME>` and its corresponding [`PLATFORM_RELATIONSHIPS` environment variable](/development/variables/use-variables.md#use-provided-variables).
+
+{{< /codetabs >}}
+
+### Example configuration
+
+### [Service definition](/add-services.html)
+
+```yaml {configFile="services"}
+# The name of the service container. Must be unique within a project.
+opensearch:
+  type: opensearch:{{% latest "opensearch" %}}
+  disk: 256
+```
+
+#### [App configuration](/create-apps/_index.md)
+
+{{< codetabs >}}
+
++++
+title=Using default endpoints
++++
+
+```yaml {configFile="app"}
+# Relationships enable access from this app to a given service.
+# The example below shows simplified configuration leveraging a default service
+# (identified from the relationship name) and a default endpoint.
+# See the Application reference for all options for defining relationships and endpoints.
+relationships:
+  opensearch:
+```
+
+<--->
+
++++
+title=Using explicit endpoints
++++
+
+```yaml {configFile="app"}
+# Relationships enable access from this app to a given service.
+# The example below shows configuration with an explicitly set service name and endpoint.
+# See the Application reference for all options for defining relationships and endpoints.
+# Note that legacy definition of the relationship is still supported.
+# More information: https://docs.platform.sh/create-apps/app-reference/single-runtime-image.html#relationships
+relationships:
+  opensearch:
+    service: opensearch
+    endpoint: opensearch
+```
+
+{{< /codetabs >}}
+
+### Use in app
+
+To use the configured service in your app, add a configuration file similar to the following to your project.
+
+{{< codetabs >}}
+
++++
+title=Using default endpoints
++++
+
+```yaml {configFile="app"}
+name: myapp
+
+[...]
+
+relationships:
+  opensearch:
+```
+
+<--->
+
++++
+title=Using explicit endpoints
++++
+
+```yaml {configFile="app"}
+name: myapp
+
+[...]
+
+relationships:
+  opensearch:
+    service: opensearch
+    endpoint: opensearch
+```
+
+{{< /codetabs >}}
+
+This configuration defines a single application (`myapp`), whose source code exists in the `<PROJECT_ROOT>/myapp` directory.</br>
+`myapp` has access to the `opensearch` service, via a relationship whose name is [identical to the service name](#2-define-the-relationship)
+(as per [default endpoint](/create-apps/app-reference/single-runtime-image#relationships) configuration for relationships).
+
+From this, `myapp` can retrieve access credentials to the service through the environment variable `{{< vendor/prefix >}}_RELATIONSHIPS`. That variable is a base64-encoded JSON object, but can be decoded at runtime (using the built-in tool `jq`) to provide more accessible environment variables to use within the application itself:
+
+```bash {location="myapp/.environment"}
+# Decode the built-in credentials object variable.
+export RELATIONSHIPS_JSON=$(echo ${{< vendor/prefix >}}_RELATIONSHIPS | base64 --decode)
+
+# Set environment variables for individual credentials.
+export OS_SCHEME=$(echo $RELATIONSHIPS_JSON | jq -r ".opensearch[0].scheme")
+export OS_HOST=$(echo $RELATIONSHIPS_JSON | jq -r ".opensearch[0].host")
+export OS_PORT=$(echo $RELATIONSHIPS_JSON | jq -r ".opensearch[0].port")
+
+# Surface more common OpenSearch connection string variables for use in app.
+export OPENSEARCH_USERNAME=$(echo $RELATIONSHIPS_JSON | jq -r ".opensearch[0].username")
+export OPENSEARCH_PASSWORD=$(echo $RELATIONSHIPS_JSON  | jq -r ".opensearch[0].password")
+export OPENSEARCH_HOSTS=[\"$OS_SCHEME://$OS_HOST:$OS_PORT\"]
+```
+
+The above file &mdash; `.environment` in the `myapp` directory &mdash; is automatically sourced by {{< vendor/name >}} into the runtime environment, so that the variable `OPENSEARCH_HOSTS` can be used within the application to connect to the service.
+
+Note that `OPENSEARCH_HOSTS` and all {{< vendor/name >}}-provided environment variables like `{{% vendor/prefix %}}_RELATIONSHIPS`, are environment-dependent. Unlike the build produced for a given commit, they can't be reused across environments and only allow your app to connect to a single service instance on a single environment.
+
+A file very similar to this is generated automatically for your when using the `{{< vendor/cli >}} ify` command to [migrate a codebase to {{% vendor/name %}}](/get-started).
 
 {{< note >}}
 
@@ -48,58 +301,64 @@ By default, OpenSearch has no authentication.
 No username or password is required to connect to it.
 
 You may optionally enable HTTP Basic authentication.
-To do so, include the following in your `services.yaml` configuration:
+To do so, include the following in your `{{< vendor/configfile "services" >}}` configuration:
 
-```yaml {location=".platform/services.yaml"}
-search:
-    type: opensearch:2
-    disk: 2048
-    configuration:
-        authentication:
-            enabled: true
+```yaml {configFile="services"}
+# The name of the service container. Must be unique within a project.
+opensearch:
+  type: opensearch:{{% latest "opensearch" %}}
+  disk: 2048
+  configuration:
+    authentication:
+      enabled: true
 ```
 
 That enables mandatory HTTP Basic auth on all requests.
 The credentials are available in any relationships that point at that service,
 in the `username` and `password` properties.
-{{% service-values-change %}}
+
+Note that the information about the relationship can change when an app is redeployed or restarted or the relationship is changed. So your apps should only rely on the `{{% vendor/prefix %}}_RELATIONSHIPS` environment variable directly rather than hard coding any values.
 
 This functionality is generally not required if OpenSearch isn't exposed on its own public HTTP route.
 However, certain applications may require it, or it allows you to safely expose OpenSearch directly to the web.
-To do so, add a route to `routes.yaml` that has `search:opensearch` as its upstream
-(where `search` is whatever you named the service in `services.yaml`).
+To do so, add a route to `{{< vendor/configfile "routes" >}}` that has `opensearch:opensearch` as its upstream
+(where `opensearch` is whatever you named the service).
+
 For example:
 
-```yaml {location=".platform/routes.yaml"}
-"https://os.{default}":
-    type: upstream
-    upstream: search:opensearch
+```yaml {configFile="routes"}
+"https://www.os.{default}/":
+  type: redirect
+  to: "https://os.{default}/"
+"https://os.{default}/":
+  type: upstream
+  upstream: "opensearch:opensearch"
 ```
 
 ## Plugins
 
 OpenSearch offers a number of plugins.
-To enable them, list them under the `configuration.plugins` key in your `services.yaml` file, like so:
+To enable them, list them under the `configuration.plugins` key in your `{{< vendor/configfile "services" >}}` file, like so:
 
-```yaml {location=".platform/services.yaml"}
-search:
-    type: "opensearch:2"
-    disk: 1024
-    configuration:
-        plugins:
-            - analysis-icu
-            - mapper-size
+```yaml {configFile="services"}
+# The name of the service container. Must be unique within a project.
+opensearch:
+  type: "opensearch:{{% latest "opensearch" %}}"
+  disk: 1024
+  configuration:
+    plugins:
+      - analysis-icu
 ```
 
 In this example you'd have the ICU analysis plugin and the size mapper plugin.
 
-If there is a publicly available plugin you need that isn't listed here, [contact support](../overview/get-support.md).
+If there is a publicly available plugin you need that isn't listed here, [contact support](/learn/overview/get-support.md).
 
 ### Available plugins
 
 This is the complete list of plugins that can be enabled:
 
-| Plugin                  | Description                                                                               | 1.2 | 2 |
+| Plugin                  | Description                                                                               | 1   | 2 |
 |-------------------------|-------------------------------------------------------------------------------------------|-----|---|
 | `analysis-icu`          | Support ICU Unicode text analysis                                                         | *   | * |
 | `analysis-kuromoji`     | Japanese language support                                                                 | *   | * |
@@ -117,7 +376,7 @@ This is the complete list of plugins that can be enabled:
 
 ### Plugin removal
 
-Removing plugins previously added in your `services.yaml` file doesn't automatically uninstall them from your OpenSearch instances.
+Removing plugins previously added in your `{{< vendor/configfile "services" >}}` file doesn't automatically uninstall them from your OpenSearch instances.
 This is deliberate, as removing a plugin may result in data loss or corruption of existing data that relied on that plugin.
 Removing a plugin usually requires reindexing.
 
@@ -135,10 +394,10 @@ There are two ways to do so.
 
 ### Destructive
 
-In your `services.yaml` file, change the version *and* name of your OpenSearch service.
-Then update the name in the `.platform.app.yaml` relationships block.
+In your `{{< vendor/configfile "services" >}}` file, change the version *and* name of your OpenSearch service.
+Be sure to also update the reference to the now changed service name in it's corresponding application's `relationship` block.
 
-When you push that to {{< vendor/name >}}, the old service is deleted and a new one with the new name is created with no data.
+When you push that to {{% vendor/name %}}, the old service is deleted and a new one with the new name is created with no data.
 You can then have your application reindex data as appropriate.
 
 This approach has the downsides of temporarily having an empty OpenSearch instance,
@@ -148,7 +407,7 @@ Depending on the size of your data that could take a while.
 ### Transitional
 
 With a transitional approach, you temporarily have two OpenSearch services.
-Add a second OpenSearch service with the new version a new name and give it a new relationship in `.platform.app.yaml`.
+Add a second OpenSearch service with the new version a new name and give it a new relationship in `{{< vendor/configfile "app" >}}`.
 You can optionally run in that configuration for a while to allow your application to populate indexes in the new service as well.
 
 Once you're ready to switch over, remove the old OpenSearch service and relationship.

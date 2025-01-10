@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+.bg-primary-darker {
+    /* background-color: rgb(38,28,102, 1.0) !important; */
+    /* background-color: #4D38CC !important; */
+    background-color: #191C1E !important;
+    /* background-color: rgb(19,14,51, 1.0) !important; */
+}
+
+.bg-skye {
+    background-color: #6046FF !important;
+    color: white !important;
+    border-radius: 40px !important;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.secondary-action {
+    background-color: white !important;
+    color: black;
+    border-radius: 40px !important;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.primary-action,
+.secondary-action {
+    padding: 0.5rem 1.5rem !important;
+}
+
+
+.primary-action:hover {
+    background: #4D38CC !important;
+    /* background: #FF9F9F !important; */
+    /* color: #191C1E !important; */
+    color: white !important;
+}
+
+header {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.from-pink-light {
+    --tw-gradient-from: #BFB5FF !important;
+}
+
+.recruit-banner {
+    background-color: #CCF6FB !important;
+}
+
+/* .hover:bg-pink {
+    background: #4D38CC !important;
+}  */
+
+/* .bg-skye-light {
+    background-color: black !important;
+    color: white!important;
+    border-radius: 40px !important;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 24px;
+} */
+
+.bg-skye:hover :where(a):not(:where([class~="primary-action"] *)):hover {
+    background-color: black !important;
+    color: white !important;
+}
+
+.bg-grey {
+    background-color: #FFFFFF !important;
+}
+
+body {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 16px;
+    line-height: 32px;
+    font-weight: 400;
+    color: #191C1E
+  }
+
+.prose :where(a):not(:where([class~="not-prose"] *)) {
+    color: #6046FF !important;
+    text-decoration: underline !important;
+    font-weight: 400 !important;
+}
+
+.prose :where(a):not(:where([class~="not-prose"] *)):hover {
+    color: #4D38CC !important;
+}
+
+.hover\:bg-pink:hover {
+  --tw-bg-opacity: 1;
+  background: #4D38CC !important;
+  color: white !important;
+}
+
+.text-skye-dark,
+.\[\&_a\]\:text-skye-dark a {
+    color: #6046FF !important;
+}
+
+/* .prose :where(code):not(:where([class~="not-prose"] *)) {
+    background-color: rgb(39, 40, 34) !important;
+    color: rgb(255, 255, 255) !important;
+    font-size: 0.95rem !important;
+    padding: 0.187rem 0.625rem !important;
+    border-radius: 0.187rem !important;
+} */
+
+*, ::after, ::before {
+    border-color: #FFFFFF !important;
+}
+
+h4.font-semibold {
+    font-weight: 400;
+}
+
+summary {
+  cursor: pointer;
+}
+
+/* This would turn off the sticky table header, if desired later. */
+/* thead {
+    position: static !important;
+    top: auto !important;
+} */
+
+.related-content {
+    background: #DFDAFF;
+    padding: 0.5rem 2rem 1.5rem 2rem;
+}
+
+.cta-text {
+    font-family: "Open Sans", sans-serif;
+}
+
+.cta-terms {
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #8B9397;
+    line-height: 0.9rem;
+}
+
+.cta-body {
+    font-weight: 500;
+    font-size: 0.85rem;
+    line-height: 1.2rem;
+}

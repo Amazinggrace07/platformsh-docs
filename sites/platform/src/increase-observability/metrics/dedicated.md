@@ -7,7 +7,7 @@ description: "Understand how to read metrics for {{% names/dedicated-gen-2 %}} e
 For {{% names/dedicated-gen-2 %}} environments, infrastructure metrics report CPU, RAM, and disk space per host and mount point.
 The graphs differ when the environment has multiple clusters.
 
-Metrics are available for Production environments and [Grid environments](./grid.md) (such as your development environments).
+Metrics are available for Production environments and [Grid environments](./grid.md) (such as your preview environments).
 They aren't available for other {{% names/dedicated-gen-2 %}} environments (such as a staging environment).
 
 By default, the graphs include all hosts and an average over the hosts.
@@ -36,7 +36,7 @@ You get output similar to the following:
 
 ```bash
 
- Welcome to {{< vendor/name >}}.
+ Welcome to {{% vendor/name %}}.
 
  This is environment production-qwerty8 of project abcde3clusterID.
 
@@ -68,7 +68,7 @@ The metrics below are for a single Production environment.
 
 Once you've read the metrics, see [recommendations for action](./_index.md#dedicated-gen-2-environments).
 
-![All of the metrics available for a {{% names/dedicated-gen-2 %}} environment](/images/metrics/all-dedicated.png "0.5")
+![All of the metrics available for a {{% names/dedicated-gen-2 %}} environment](/images/metrics/all-dedicated-metrics.png "0.5")
 
 ### CPU
 
@@ -88,7 +88,7 @@ The upper limit in the graph is 3.62&nbsp;GB because 0.38&nbsp;GB of memory are 
 ### Disk
 
 Disk represents the plan space for all services and mounts,
-which for {{% names/dedicated-gen-2 %}} production environments is [50&nbsp;GB](../../dedicated-gen-2/architecture/_index.md).
+which for {{% names/dedicated-gen-2 %}} production environments is [50&nbsp;GB](/dedicated-environments/dedicated-gen-2/overview.md).
 
 This example has the following persistent disk space configured:
 

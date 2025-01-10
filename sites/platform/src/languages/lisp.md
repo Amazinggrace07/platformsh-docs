@@ -1,65 +1,89 @@
 ---
 title: "Lisp"
-description: "{{< vendor/name >}} supports building and deploying applications written in Lisp using Common Lisp (the SBCL version) with ASDF and Quick Lisp support. They're compiled during the Build phase, and support both committed dependencies and download-on-demand."
+description: "{{% vendor/name %}} supports building and deploying applications written in Lisp using Common Lisp (the SBCL version) with ASDF and Quick Lisp support. They're compiled during the Build phase, and support both committed dependencies and download-on-demand."
 ---
+
+{{% composable/disclaimer %}}
 
 {{% description %}}
 
 ## Supported versions
 
-{{% major-minor-versions-note configMinor="true" %}}
+You can select the major and minor version.
 
-| Grid and {{% names/dedicated-gen-3 %}} | {{% names/dedicated-gen-2 %}} |
-|----------------------------------------|------------------------------ |
-| {{< image-versions image="lisp" status="supported" environment="grid" >}} | {{< image-versions image="lisp" status="supported" environment="dedicated-gen-2" >}} |
+Patch versions are applied periodically for bug fixes and the like. When you deploy your app, you always get the latest available patches.
+
+<table>
+    <thead>
+        <tr>
+            <th>Grid and {{% names/dedicated-gen-3 %}}</th>
+            <th>Dedicated Gen 2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{< image-versions image="lisp" status="supported" environment="grid" >}}</td>
+            <td>{{< image-versions image="lisp" status="supported" environment="dedicated-gen-2" >}}</thd>
+        </tr>
+    </tbody>
+</table>
 
 {{% language-specification type="lisp" display_name="Lisp" %}}
 
+```yaml {configFile="app"}
+type: 'lisp:<VERSION_NUMBER>'
+```
+
+For example:
+
+```yaml {configFile="app"}
+type: 'lisp:{{% latest "lisp" %}}'
+```
+
 ## Assumptions
 
-{{< vendor/name >}} is making assumptions about your application to provide a more streamlined experience. These assumptions are the following:
+{{% vendor/name %}} is making assumptions about your application to provide a more streamlined experience. These assumptions are the following:
 
 - Your `.asd` file is named like your system name. For example `example.asd` has `(defsystem example ...)`.
 
-{{< vendor/name >}} will then run `(asdf:make :example)` on your system to build a binary.
+{{% vendor/name %}} will then run `(asdf:make :example)` on your system to build a binary.
 
-If you don't want these assumptions, you can disable this behavior by specifying in your `.platform.app.yaml`:
+If you don't want these assumptions, you can disable this behavior by specifying in your `{{< vendor/configfile "app" >}}`:
 
-```yaml
+```yaml {configFile="app"}
 build:
-    flavor: none
+  flavor: none
 ```
 
 ## Dependencies
 
-The recommended way to handle Lisp dependencies on {{< vendor/name >}} is using ASDF. Commit a `.asd` file in your repository and the system will automatically download the dependencies using QuickLisp.
+The recommended way to handle Lisp dependencies on {{% vendor/name %}} is using ASDF. Commit a `.asd` file in your repository and the system will automatically download the dependencies using QuickLisp.
 
 ## QuickLisp options
 
 If you wish to change the distributions that QuickLisp is using, you can specify those as follows, specifying a distribution name, its URL and, an optional version:
 
-```yaml
+```yaml {configFile="app"}
 runtime:
-    quicklisp:
-        {{< variable "DISTRIBUTION_NAME" >}}:
-            url: "..."
-            version: "..."
+  quicklisp:
+    {{< variable "DISTRIBUTION_NAME" >}}:
+      url: "..."
+      version: "..."
 ```
 
 For example:
 
-```yaml
+```yaml {configFile="app"}
 runtime:
+  quicklisp:
     quicklisp:
-        quicklisp:
-            url: 'http://beta.quicklisp.org/dist/quicklisp.txt'
-            version: '2019-07-11'
+      url: 'http://beta.quicklisp.org/dist/quicklisp.txt'
+      version: '2019-07-11'
 ```
-
 
 ## Built-in variables
 
-{{< vendor/name >}} exposes relationships and other configuration as [environment variables](../development/variables/_index.md).
+{{% vendor/name %}} exposes relationships and other configuration as [environment variables](../development/variables/_index.md).
 To get the `PORT` environment variable (the port on which your web application is supposed to listen):
 
 ```lisp
@@ -72,18 +96,18 @@ Assuming `example.lisp` and `example.asd` are present in your repository, the ap
 You can then start it from the `web.commands.start` directive.
 Note that the start command _must_ run in the foreground. Should the program terminate for any reason it's automatically restarted. In the example below the app sleeps for a very, very long time. You could also choose to join the thread of your web server, or use other methods to make sure the program doesn't terminate.
 
-The following basic `.platform.app.yaml` file is sufficient to run most Lisp applications.
+The following basic `{{< vendor/configfile "app" >}}` file is sufficient to run most Lisp applications.
 
-```yaml
-name: app
+```yaml {configFile="app"}
+name: myapp
 type: lisp:1.5
 web:
-    commands:
-        start: ./example
-    locations:
-        /:
-            allow: false
-            passthru: true
+  commands:
+    start: ./example
+  locations:
+    /:
+      allow: false
+      passthru: true
 disk: 512
 ```
 
@@ -110,11 +134,11 @@ The following is an example of accessing a PostgreSQL instance:
       (s-base64:decode-base64-bytes in)))))
 ```
 
-Given a relationship defined in `.platform.app.yaml`:
+Given a relationship defined in `{{< vendor/configfile "app" >}}`:
 
-```yaml
+```yaml {configFile="app"}
 relationships:
-    pg: postgresql:postgresql
+  postgresql:
 ```
 
 The following would access that relationship, and provide your Lisp program the credentials to connect to a PostgreSQL instance. Add this to your `.asd` file:
@@ -129,7 +153,7 @@ Then in your program you could access the PostgreSQL instance as follows:
 (defvar *pg-spec* nil)
 
 (defun setup-postgresql ()
-  (let* ((pg-relationship (first (jsown:val (relationships) "pg")))
+  (let* ((pg-relationship (first (jsown:val (relationships) "postgresql")))
          (database (jsown:val pg-relationship "path"))
          (username (jsown:val pg-relationship "username"))
          (password (jsown:val pg-relationship "password"))
@@ -147,7 +171,7 @@ Then in your program you could access the PostgreSQL instance as follows:
 ## Example
 
 The following is a basic example of a Hunchentoot-based web app
-(you can find the corresponding `.asd` and {{< vendor/name >}} `.yaml` files in the [template](#project-templates)):
+(you can find the corresponding `.asd` and {{% vendor/name %}} `.yaml` files in the [template](#project-templates)):
 
 ```lisp
 (defpackage #:example
@@ -168,8 +192,10 @@ The following is a basic example of a Hunchentoot-based web app
 ```
 
 Notice how it gets the `PORT` from the environment and how it sleeps at the end,
-as `(start acceptor)` immediately yields and {{< vendor/name >}} requires apps to run in the foreground.
+as `(start acceptor)` immediately yields and {{% vendor/name %}} requires apps to run in the foreground.
+
 
 ## Project templates
 
 {{< repolist lang="lisp" displayName="Lisp" >}}
+

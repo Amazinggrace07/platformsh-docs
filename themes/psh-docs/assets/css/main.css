@@ -1,6 +1,31 @@
+/* Relative to site directory */
+@import './node_modules/asciinema-player/dist/bundle/asciinema-player.css';
 /* Base TailwindCSS styles */
 /* https://tailwindcss.com/docs/functions-and-directives#tailwind */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.cta-text {
+    font-family: "Open Sans", sans-serif;
+}
+
+.cta-terms {
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #8B9397;
+    line-height: 0.9rem;
+}
+
+.cta-body {
+    font-weight: 500;
+    font-size: 0.85rem;
+    line-height: 1.2rem;
+}
+
+.tab-item {
+  cursor: pointer;
+}
+
+

@@ -2,10 +2,10 @@
 title: Configure apps
 weight: -210
 description: |
-  Control your apps and how they're built and deployed on {{< vendor/name >}} with YAML configuration.
+  Control your apps and how they're built and deployed on {{% vendor/name %}} with YAML configuration.
 layout: single
 keywords:
-  - ".platform.app.yaml"
+  - '{{% vendor/configfile "app" %}}'
 ---
 
 {{% description %}}
@@ -16,7 +16,7 @@ Within a single project, you can have one or more apps and each app can have mul
 Instances are where the same code can be run with different configurations,
 such as one for external communication and one for background processes.
 All of the apps and instances are configured with the same syntax.
-You can find a [complete reference](./app-reference.md) of all possible settings.
+You can find a [complete reference](/create-apps/app-reference/single-runtime-image.md) of all possible settings.
 
 ## A minimal application
 
@@ -29,28 +29,31 @@ To create a very basic app, you need a few things:
 
 The following example shows such a basic setup for Node.js:
 
-```yaml {location=".platform.app.yaml"}
+<!-- @todo: code-links break the rendering. Removed for now, to revisit. -->
+```yaml {configFile="app"}
 # The app's name, which must be unique within the project.
-{{< code-link destination="/create-apps/app-reference.html#top-level-properties" text="name" >}}: 'app'
+name: 'myapp'
 
 # The language and version for your app.
-{{< code-link destination="/create-apps/app-reference.html#types" text="type" >}}: 'nodejs:16'
+type: 'nodejs:{{% latest "nodejs" %}}'
 
 # The size of the app's persistent disk (in MB).
-{{< code-link destination="/create-apps/app-reference.html#top-level-properties" text="disk" >}}: 2048
+disk: 2048
 
 # The app's configuration when it's exposed to the web.
-{{< code-link destination="/create-apps/app-reference.html#web" text="web" >}}:
-    {{< code-link destination="/create-apps/app-reference.html#locations" text="locations" >}}:
-        '/':
-            # The public directory relative to the app root.
-            root: 'public'
-            # Forward resources to the app.
-            passthru: true
-            # What files to use when serving a directory.
-            index: ["index.html"]
-            # Allow files even without specified rules.
-            allow: true
+web:
+  commands:
+    start: npm start
+  locations:
+    '/':
+      # The public directory relative to the app root.
+      root: 'public'
+      # Forward resources to the app.
+      passthru: true
+      # What files to use when serving a directory.
+      index: ["index.html"]
+      # Allow files even without specified rules.
+      allow: true
 ```
 
 ## Use multiple apps
@@ -62,19 +65,19 @@ See the various ways to set up a [multi-app project](./multi-app/_index.md).
 
 ## Connect to services
 
-If you want to use one of the [databases or other services {{< vendor/name >}} provides](../add-services/_index.md),
+If you want to use one of the [databases or other services {{% vendor/name %}} provides](../add-services/_index.md),
 set it up by following these steps:
 
 1. Configure the service based on the documentation for that service.
-1. Use the information from that service inside your app's [`relationships` definition](./app-reference.md#relationships)
+1. Use the information from that service inside your app's [`relationships` definition](/create-apps/app-reference/single-runtime-image.md#relationships)
    to configure how your app communicates with the service.
 
 ## Control the build and deploy process
 
 Your app generally needs to undergo some steps to be turned from the code in your Git repository into a running app.
-If you're running a PHP or Node.js app, this starts with the [build flavor](./app-reference.md#build),
+If you're running a PHP or Node.js app, this starts with the [build flavor](/create-apps/app-reference/single-runtime-image.md#build),
 which runs a default set of tasks.
-Then any [global dependencies](./app-reference.md#dependencies) can be installed.
+Then any [global dependencies](/create-apps/app-reference/single-runtime-image.md#dependencies) can be installed.
 
 Once these optional tasks are done, you can run [hooks](./hooks/_index.md) at various points in the process.
 Hooks are places for your custom scripts to control how your app is built and deployed.
@@ -82,7 +85,7 @@ Hooks are places for your custom scripts to control how your app is built and de
 ## Configure what's served
 
 Once your app is built, it needs a defined way to communicate with the outside world.
-Define its behavior with a [`web` instance](./app-reference.md#web).
+Define its behavior with a [`web` instance](/create-apps/app-reference/single-runtime-image.md#web).
 There you can set what command runs every time your app is restarted,
 how dynamic requests are handled, and how to respond with static files.
 
@@ -95,11 +98,11 @@ doing so when the response includes any user-specific information, including a s
 opens up an attack vector over SSL/TLS connections.
 For that reason, you generally shouldn't compress generated responses.
 
-Requests for static files that are served directly by {{< vendor/name >}} are compressed automatically
+Requests for static files that are served directly by {{% vendor/name %}} are compressed automatically
 using either gzip or Brotli compression if:
 
 * The request headers for the file support gzip or Brotli compression.
-* The file is served directly from disk by {{< vendor/name >}} and not passed through your application.
+* The file is served directly from disk by {{% vendor/name %}} and not passed through your application.
 * The file would be served with a cache expiration time in the future.
 * The file type is one of: HTML, JavaScript, JSON, PDF, PostScript, SVG, CSS, CSV, plain text, or XML.
 
@@ -111,28 +114,108 @@ This approach supports any file type and offers some CPU optimization, especiall
 
 ## Comprehensive example
 
-The following example shows a setup for a PHP app with comments to explain the settings.
+{{< note title="PHP specifics" theme="info" >}}
 
-```yaml {location=".platform.app.yaml"}
+Unlike other runtimes most PHP applications do not have a start command. There is a daemon running configured to work automatically with the web server. More often than not there will be a single entry-point a "front-controller". In the case of PHP the `passthru` property is a string with the location of the front-controller rather than a boolean.
+
+{{< /note >}}
+
+The following example shows a setup for a PHP app with comments to explain the settings. Please note that Composable image is currently available as a Beta feature.
+
+{{< codetabs >}}
+
++++
+title=Single-runtime image
++++
+
+```yaml {configFile="app"}
 # The app's name, which must be unique within the project.
-{{< code-link destination="/create-apps/app-reference.html#top-level-properties" text="name" >}}: 'app'
+name: 'myapp'
 
 # The language and version for your app.
-{{< code-link destination="/create-apps/app-reference.html#types" text="type" >}}: 'php:8.1'
+type: 'php:{{% latest "php" %}}'
 
 # Global dependencies to be added and cached and then available as commands.
-{{< code-link destination="/create-apps/app-reference.html#dependencies" text="dependencies" >}}:
-    php:
-        composer/composer: '^2'
+dependencies:
+  php:
+    composer/composer: '^2'
 
-# The app's relationships (connections) with services or other applications.
-# The key is the relationship name that can be viewed in the app.
-# The value is specific to how the service is configured.
-{{< code-link destination="/create-apps/app-reference.html#relationships" text="relationships" >}}:
-    database: 'mysqldb:mysql'
+# Relationships enable an app container's access to a service or another app.
+# The example below shows simplified configuration leveraging a default service
+# (identified from the relationship name) and a default endpoint.
+# See the Application reference for all options for defining relationships and endpoints.
+relationships:
+  mysql:
 
 # Scripts that are run as part of the build and deploy process.
-{{< code-link destination="/create-apps/hooks.html" text="hooks" >}}:
+hooks:
+  # Build hooks can modify app files on disk but not access any services like databases.
+  build: ./build.sh
+  # Deploy hooks can access services but the file system is now read-only.
+  deploy: ./deploy.sh
+  # Post deploy hooks run when the app is accepting outside requests.
+  post_deploy: ./post_deploy.sh
+
+# The size of the app's persistent disk (in MB).
+disk: 2048
+
+# Define writable, persistent filesystem mounts.
+# The key is the directory path relative to the application root.
+# In this case, `web-files` is just a unique name for the mount.
+mounts:
+  'web/files':
+    source: local
+    source_path: 'web-files'
+
+# The app's configuration when it's exposed to the web.
+web:
+  locations:
+    '/':
+      # The app's public directory relative to its root.
+      root: 'public'
+      # A front controller to determine how to handle requests.
+      passthru: '/app.php'
+    # Allow uploaded files to be served, but don't run scripts.
+    # Missing files get sent to the front controller.
+    '/files':
+      root: 'web/files'
+      scripts: false
+      allow: true
+      passthru: '/app.php'
+```
+<--->
+
++++
+title=Composable image (Beta)
++++
+
+```yaml {configFile="app"}
+# The app's name, which must be unique within the project.
+myapp:
+  # The list of packages you want installed (from the {{% vendor/name %}} collection
+  # of supported runtimes and/or from Nixpkgs).
+  # For more information, see the Composable image page in the App reference section.
+  stack:
+    - "php@8.3"
+        # The list of PHP extensions you want installed.
+        extensions:
+          - apcu
+          - ctype
+          - iconv
+          - mbstring
+          - pdo_pgsql
+          - sodium
+          - xsl
+
+# Relationships enable an app container's access to a service or another app.
+# The example below shows simplified configuration leveraging a default service
+# (identified from the relationship name) and a default endpoint.
+# See the Application reference for all options for defining relationships and endpoints.
+relationships:
+  mysql:
+
+# Scripts that are run as part of the build and deploy process.
+hooks:
     # Build hooks can modify app files on disk but not access any services like databases.
     build: ./build.sh
     # Deploy hooks can access services but the file system is now read-only.
@@ -141,19 +224,19 @@ The following example shows a setup for a PHP app with comments to explain the s
     post_deploy: ./post_deploy.sh
 
 # The size of the app's persistent disk (in MB).
-{{< code-link destination="/create-apps/app-reference.html#top-level-properties" text="disk" >}}: 2048
+disk: 2048
 
 # Define writable, persistent filesystem mounts.
 # The key is the directory path relative to the application root.
 # In this case, `web-files` is just a unique name for the mount.
-{{< code-link destination="/create-apps/app-reference.html#mounts" text="mounts" >}}:
-    'web/files':
-        source: local
-        source_path: 'web-files'
+mounts:
+  'web/files':
+    source: local
+    source_path: 'web-files'
 
 # The app's configuration when it's exposed to the web.
-{{< code-link destination="/create-apps/app-reference.html#web" text="web" >}}:
-    {{< code-link destination="/create-apps/app-reference.html#locations" text="locations" >}}:
+web:
+    locations:
         '/':
             # The app's public directory relative to its root.
             root: 'public'
@@ -167,3 +250,5 @@ The following example shows a setup for a PHP app with comments to explain the s
             allow: true
             passthru: '/app.php'
 ```
+
+{{< /codetabs >}}

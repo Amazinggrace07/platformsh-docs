@@ -3,7 +3,7 @@ title: "Deploy Strapi"
 sidebarTitle: "Deploy"
 weight: -80
 description: |
-  Now that your site is ready, push it to {{< vendor/name >}} and import your data.
+  Now that your site is ready, push it to {{% vendor/name %}} and import your data.
 ---
 
 {{% guides/deployment %}}
@@ -22,4 +22,4 @@ Below are a few modifications that may help you develop your site more efficient
 
 Go forth and deploy (even on Friday)!
 
-{{< guide-buttons type="last" >}}
+{{< guide-buttons previous="Back" type="last" >}}

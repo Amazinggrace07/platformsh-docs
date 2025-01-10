@@ -1,18 +1,40 @@
 
 # Basics
-version: "1.0.18"
+version: "1.1.0"
 description: Platform.sh User Documentation
 author: Platform.sh
 title: User documentation
 issuerepo: "https://github.com/platformsh/platformsh-docs/"
 repo: "https://github.com/platformsh/platformsh-docs/"
+folder: "sites/platform"
 editPageButton: true
 
 # Vendorization
 vendor:
     name: Platform.sh
     cli: platform
+    altname: platformsh
     env_prefix: PLATFORM
+    cli_prefix: PLATFORMSH
+    recruit:
+        active: true
+        link: https://auth.api.platform.sh/register/
+        cta: Activate your trial
+        title: Try for 30 days
+        description: "Flexible, version-controlled infrastructure provisioning and development-to-production workflows"
+    config:
+        version: 1
+        dir: .platform
+        filename: applications.yaml
+        files:
+            routes: .platform/routes.yaml
+            services: .platform/services.yaml
+            app: .platform.app.yaml
+            apps: .platform/applications.yaml
+        prefix:
+            apps: applications
+            services: services
+            routes: routes
     urls:
         main: https://platform.sh/
         docs: https://docs.platform.sh/
@@ -20,15 +42,13 @@ vendor:
         sales: https://platform.sh/contact
         console: https://console.platform.sh/
         api: https://api.platform.sh/
-    config_dir: .platform
-    files:
-        routes: .platform/routes.yaml
-        services: .platform/services.yaml
-        apps: .platform.app.yaml
+        host: platform.sh
+        hostname: platformsh.site
+        register: https://auth.api.platform.sh/register
 
 # Images (kept in static/)
 logo: "images/logos/Platformsh_logo_white.svg"
-logolinksto: "https://platform.sh"
+logolinksto: "/"
 logoAlt: "Platform.sh"
 favicon: "images/logos/favicon.ico"
 
@@ -38,7 +58,7 @@ gtm: "GTM-KRPJGT4"
 headerActions:
   headerActionPrimary:
     destination: https://auth.api.platform.sh/register
-    linkText: Free trial
+    linkText: Sign up
   headerActionSecondary:
     destination: https://console.platform.sh/
     linkText: Log in
@@ -57,18 +77,32 @@ _404:
 
 # Sections in the navigation sidebar
 navSections:
-  home:
-    title: Guides and reference
-    section: home
-    weight: -120
   get-started:
     title: Get started
     section: get-started
+    weight: -120
+  learn:
+    title: Learn
+    section: learn
     weight: -110
   guides:
-    title: Stacks
+    title: Frameworks
     section: guides
     weight: -100
+  home:
+    title: Reference
+    section: home
+    weight: -90
+
+nonDocsSections:
+  apidocs:
+    title: API Documentation
+    link: https://api.platform.sh/docs
+    weight: -80
+  # community:
+  #   title: Community Forum
+  #   link: https://community.platform.sh
+  #   weight: -70
 
 # Metadata
 meta:

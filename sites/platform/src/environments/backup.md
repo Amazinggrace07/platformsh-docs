@@ -14,19 +14,18 @@ or each time you increase the storage space of your services.
 
 You also have regularly scheduled automated backups of your production environments to cover most cases.
 
-Note that you can only create backups and restore active environments.
-To work with an [inactive environment](../other/glossary.md#inactive-environment),
-first activate it.
+You can only create backups and restore active environments.
+To work with an [inactive environment](/glossary.md#inactive-environment), first activate it.
 
 ## How backup and restore works
 
-1. As an [admin user](../administration/users.md), you can do a backup of your environment. 
+1. As an [admin user](../administration/users.md), you can do a backup of your environment.
    This backup includes the complete data and code of the environment.
    All persistent data from all running [services](../add-services/_index.md)
-   and any files stored on [mounts](../create-apps/app-reference.md#mounts) are included.
-   The backup is stored internally on {{< vendor/name >}}.
-   That is, the backup can be applied to environments on {{< vendor/name >}}, but it can't be downloaded.
-   If you need to download backups, instead [export your mount and service data](../tutorials/exporting.md)).
+   and any files stored on [mounts](/create-apps/app-reference/single-runtime-image.md#mounts) are included.
+   The backup is stored internally on {{% vendor/name %}}.
+   That is, the backup can be applied to environments on {{% vendor/name %}}, but it can't be downloaded.
+   If you need to download backups, instead [export your mount and service data](/learn/tutorials/exporting.md)).
 
 2. You restore your environment using the backup.
    At this point, the data and code from the backup are restored to ensure a consistent state.
@@ -34,7 +33,7 @@ first activate it.
 
    {{< note theme="warning" title="Warning" >}}
 
-   But {{< vendor/name >}} doesn’t modify your Git repository. So by default, any further changes you make use the latest code in your repository.
+   {{% vendor/name %}} does not modify your Git repository. Any further changes you make use the latest code in your repository.
 
    {{< /note >}}
 
@@ -63,16 +62,16 @@ For information on how long backups are retained, see the [data retention policy
 
 ## Backup schedule
 
-Backups for Dedicated environments have a [specific frequency](../dedicated-gen-2/overview/backups.md).
+Backups for Dedicated environments have a [specific frequency](/dedicated-environments/dedicated-gen-2/environment-differences.md#backups).
 
-On Grid environments, non-Production environments can have up to 2 [manual backups](#create-a-manual-backup).
+On Grid environments, preview environments can have up to 2 [manual backups](#create-a-manual-backup).
 The number of available backups for Production environments depends on your schedule.
 
 | Schedule | Manual backups | Automated backups                                                      |
 |----------|----------------|------------------------------------------------------------------------|
-| Basic    | 2              | 2 daily backups (total = 2)                                            |
-| Advanced | 4              | 6 daily, 3 weekly, and 12 monthly (total = 21)                         |
-| Premium  | 4              | 3 backups for the last 24 hours, 30 daily, and 11 monthly (total = 44) |
+| Basic    | 2              | 2 daily backups (1 backup for each of the last 2 days) |
+| Advanced | 4              | 21 backups:</br>- 6 daily backups (1 backup for each of the last 6 days) </br>- 3 weekly backups (1 backup for each of the last 3 weeks)</br>- 12 monthly backups (1 backup for each of the last 12 months) |
+| Premium  | 4              | 44 backups:</br>- 3 backups for the last 24 hours</br>- 30 daily backups (1 backup for each of the last 30 days)</br>- 11 monthly backups (1 backup for each of the last 11 months) |
 
 Note that [backup retention](../security/data-retention.md#grid-backups) also depends on your schedule.
 
@@ -98,19 +97,30 @@ To upgrade to the higher schedule, follow these steps:
 5. Select the target schedule.
 6. Click **Save**.
 
-To downgrade to the lower schedule, [contact support](../overview/get-support.md).
+To downgrade to the lower schedule, [contact support](/learn/overview/get-support.md).
 
 ## Use automated backups
 
-For Dedicated environments, see more about [backups of Dedicated environments](../dedicated-gen-2/overview/backups.md).
+For Dedicated environments, see more about [backups of Dedicated environments](/dedicated-environments/dedicated-gen-2/environment-differences.md#backups).
 
-For Grid environments, automated backups are taken for Production environments at least once every day.
+For Grid environments, automated backups are taken for production environments at least once every day.
 The exact number of backups depends on your [backup schedule](#backup-schedule).
 
 Daily backups are taken at around 4:00 every day based on the [project timezone](../projects/change-project-timezone.md).
 The time for 6-hourly backups is based on the daily backup.
 
 Automated backups are always [live](#live-backups).
+
+{{< note >}}
+
+Automated backups are only available for production environments.
+
+If you're on a [development plan](/administration/pricing/_index.md#development-plans),
+all your environments are [development environments](/glossary.md#environment-type).
+This includes your future production environment.
+If you want to enable automated backups for it, [upgrade to a non-development plan](https://platform.sh/pricing/).
+
+{{< /note >}}
 
 ## Live backups
 
@@ -122,8 +132,8 @@ They may make restorations less reliable.
 To avoid such issues, schedule [manual backups](#create-a-manual-backup) during non-peak hours,
 when the short amount of downtime is least noticed.
 
-Automated backups are always live, including those taken on [{{% names/dedicated-gen-3 %}}](../dedicated-gen-3/_index.md)
-and [{{% names/dedicated-gen-2 %}}](../dedicated-gen-2/overview/_index.md) environments.
+Automated backups are always live, including those taken on [{{% names/dedicated-gen-3 %}}](/dedicated-environments/dedicated-gen-3/_index.md)
+and [{{% names/dedicated-gen-2 %}}](/dedicated-environments/dedicated-gen-2/overview/_index.md) environments.
 
 You can create a manual live backup on a Grid project:
 
@@ -135,7 +145,7 @@ title=Using the CLI
 Use the `--live` flag:
 
 ```bash
-platform backup:create --live
+{{% vendor/cli %}} backup:create --live
 ```
 
 <--->
@@ -156,7 +166,7 @@ You can create a manual backup using the [CLI](../administration/cli/_index.md) 
 title=Using the CLI
 highlight=bash
 +++
-platform backup:create
+{{% vendor/cli %}} backup:create
 <--->
 +++
 title=In the Console
@@ -171,7 +181,7 @@ title=In the Console
 
 ### Automate manual backups
 
-You can also automate the process of creating manual backups through [cron jobs](../create-apps/app-reference.md#crons).
+You can also automate the process of creating manual backups through [cron jobs](/create-apps/app-reference/single-runtime-image.md#crons).
 The cron job uses the CLI command to back up the environment.
 It requires you to [set up the CLI on the environment with an API token](../administration/cli/api-tokens.md#authenticate-in-an-environment).
 
@@ -182,5 +192,6 @@ They don't affect the automated backups taken as part of the schedule.
 ## Physical storage location
 
 Backups are stored as binary large objects separate from your environments.
-This storage is replicated over multiple data centers in different locations.
+This storage is replicated over multiple data centers in different locations
+[within the region your project is hosted in](https://platform.sh/trust-center/security/data-security/).
 This means that in the rare event a data center becomes unavailable, your backups are still available.

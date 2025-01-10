@@ -5,7 +5,7 @@ description: Set custom headers for your static content such as custom content-t
 ---
 
 When your app responds to dynamic requests, it can generate headers on the fly.
-To set headers for static content, add them in [your `web` configuration](../app-reference.md#web).
+To set headers for static content, add them in [your `web` configuration](/create-apps/app-reference/single-runtime-image.md#web).
 
 You might want to do so to add custom content-type headers, limit what other sites can embed your content,
 or allow cross origin requests.
@@ -16,30 +16,30 @@ And you want to serve both MP3 and MP4 files with the correct content types to a
 
 Start by defining a header for files in general:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 web:
-    locations:
-        "/":
-            ...
-            # Apply rules to all static files (dynamic files get rules from your app)
-            headers:
-                X-Frame-Options: SAMEORIGIN
+  locations:
+    "/":
+      ...
+      # Apply rules to all static files (dynamic files get rules from your app)
+      headers:
+        X-Frame-Options: SAMEORIGIN
 ```
 
 This sets the `X-Frame-Options` header to `SAMEORIGIN` for all static files.
 Now your files can only be embedded within your site.
 
-Now set up an exception for MP3 files using a [rule](../app-reference.md#rules):
+Now set up an exception for MP3 files using a [rule](/create-apps/app-reference/single-runtime-image.md#rules):
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 web:
-    locations:
-        "/":
-            ...
-            rules:
-                \.mp3$:
-                    headers:
-                      Content-Type: audio/mpeg
+  locations:
+    "/":
+      ...
+      rules:
+        \.mp3$:
+          headers:
+            Content-Type: audio/mpeg
 ```
 
 This rule sets an explicit content type for files that end in `.mp3`.
@@ -48,16 +48,16 @@ MP3 files don't get the `X-Frame-Options` header set before.
 
 Now set a rule for MP4 files.
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 web:
-    locations:
-        "/":
-            ...
-            rules:
-                \.mp4$:
-                    headers:
-                        X-Frame-Options: SAMEORIGIN
-                        Content-Type: video/mp4
+  locations:
+    "/":
+      ...
+      rules:
+        \.mp4$:
+          headers:
+            X-Frame-Options: SAMEORIGIN
+            Content-Type: video/mp4
 ```
 
 This rule sets an explicit content type for files that end in `.mp4`.
@@ -75,14 +75,14 @@ So now you have three header configurations:
 To allow cross origin requests, add a `Access-Control-Allow-Origin` header to responses.
 You can do so for specific origins or for all origins with a wildcard.
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 web:
-    locations:
-        "/":
-            ...
-            # Apply rules to all static files (dynamic files get rules from your app)
-            headers:
-                Access-Control-Allow-Origin: "*"
+  locations:
+    "/":
+      ...
+      # Apply rules to all static files (dynamic files get rules from your app)
+      headers:
+        Access-Control-Allow-Origin: "*"
 ```
 
 If you use the wildcard value, the headers are modified for each request in the following ways:
@@ -102,4 +102,4 @@ in your [routes configuration](../../define-routes/_index.md).
 Note that once HSTS is enabled, configuration capabilities depend
 on the [HSTS properties](https://docs.platform.sh/define-routes/https.html#enable-http-strict-transport-security-hsts)
 set in your routes configuration.
-For example, the `max-age` value is set to `31536000` by {{< vendor/name >}} and can't be customized.
+For example, the `max-age` value is set to `31536000` by {{% vendor/name %}} and can't be customized.

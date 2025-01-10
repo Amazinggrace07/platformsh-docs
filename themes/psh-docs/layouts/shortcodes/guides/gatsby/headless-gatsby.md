@@ -1,3 +1,4 @@
+<!-- shortcode start {{ .Name }} -->
 The frontend Gatsby app has a slightly different configuration from the basic [Gatsby deployment](/guides/gatsby/deploy.html).
 Below is the `gatsby/.platform.app.yaml` file that configures the app.
 
@@ -8,7 +9,7 @@ In particular, notice:
 
 - `relationships`
 
-  Access to another service or app container in the cluster is given through [`relationships`](/create-apps/app-reference.html#relationships).
+  Access to another service or app container in the cluster is given through [`relationships`](/create-apps/app-reference/single-runtime-image#relationships).
   In this case, one has been defined to the backend {{ .Get "name" }} container using it's `name`.
 
 - `post_deploy`
@@ -27,7 +28,7 @@ In particular, notice:
 
   There are consequences to postponing the Gatsby build,
   as you don't generally have write access to the container this late in the pipeline.
-  To allow Gatsby to write to `public`, that directory has been defined as a [mount](/create-apps/app-reference.html#mounts).
+  To allow Gatsby to write to `public`, that directory has been defined as a [mount](/create-apps/app-reference/single-runtime-image#mounts).
 
 {{ .Inner | .Page.RenderString }}
 
@@ -41,3 +42,4 @@ When used, Gatsby pulls the information to communicate with the {{ .Get "name" }
 Lastly, the Gatsby app itself needs to include [GraphQL queries](https://www.gatsbyjs.com/docs/reference/graphql-data-layer/)
 to handle the data coming from {{ .Get "name" }} and create content pages.
 The most important files in the template you should consult are:
+<!-- shortcode end {{ .Name }} -->

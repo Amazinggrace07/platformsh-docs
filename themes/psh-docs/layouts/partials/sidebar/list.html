@@ -1,4 +1,5 @@
 <!-- SECTION HEADING -->
+{{ $sectionKeys := .sections }}
 {{ $sectionId := printf "section-%s-sidebar-id" .Context.Title | urlize }}
 <!-- Get rid of dots like in Platform.sh -->
 {{ $sectionId = replace $sectionId "." "" }}
@@ -6,23 +7,20 @@
 {{ $isCurrentSection := false }}
 {{ $currentSection := .Context.Section }}
 <!-- For Stacks and Get started, get the next level down for the section-->
-{{ if or ( eq $currentSection "guides" ) ( eq $currentSection "get-started" ) }}
+{{ if in $sectionKeys $currentSection }}
   {{ $pageName := index ( split .Context.RelPermalink "/" ) 2 }}
   {{ $currentSection = replace $pageName ".html" "" }}
 {{ end }}
 {{ $currentPage := .CurrentPage }}
-{{ with $currentPage.File }}
-  <!-- If on home page or in the current section -->
-  {{ if or (and ($currentPage.IsHome) ( eq $currentSection "overview" )) ( hasPrefix . $currentSection ) ( hasPrefix ( replace . "get-started/" "") $currentSection ) ( hasPrefix ( replace . "guides/" "") $currentSection ) }}
+{{ with $currentPage.Path }}
+  <!-- If on home page or in the current section - @todo not clear to me how to make this part dynamic yet.-->
+  {{ if or ( hasPrefix . ( printf "/%s" $currentSection ) ) ( hasPrefix ( replace . "get-started/" "") ( printf "/%s" $currentSection ) ) ( hasPrefix ( replace . "guides/" "") ( printf "/%s" $currentSection ) ) ( hasPrefix ( replace . "learn/" "") ( printf "/%s" $currentSection ) ) ( hasPrefix ( replace . "start/" "") ( printf "/%s" $currentSection ) ) }}
     {{ $isCurrentSection = true }}
   {{ end }}
 {{ end }}
 
 <!-- If in Get started, add stack choice to nav links -->
 {{ $getStartedAttribute := "" }}
-{{ if and ( hasPrefix .Context.RelPermalink "/get-started" ) ( hasPrefix $currentPage.RelPermalink "/get-started") }}
-  {{ $getStartedAttribute = ":href=\"$el.getAttribute('destination') + '?stack=' + $data.stack\"" }}
-{{ end }}
 
 <!-- Handle pages in `other` directory separately -->
 {{ if eq $currentSection "other" }}
@@ -40,7 +38,7 @@
 <!-- Handle all other directories -->
 {{ else }}
 <div class="text-sm" x-data="{ topExpanded: {{ $isCurrentSection }} }">
-  {{ .Page }}
+  <!-- {{ .Page }} -->
   {{ $itemTitle := .Context.Title | .Context.Page.RenderString }}
   {{ if .Context.Params.sidebarTitle }}
     {{ $itemTitle = .Context.Params.sidebarTitle | .Context.Page.RenderString }}
@@ -53,27 +51,20 @@
     <h4 class="pr-2 font-semibold">
       <a href="{{ .Context.RelPermalink }}" destination="{{ .Context.RelPermalink }}" {{ $getStartedAttribute | safeHTMLAttr }} class="hover:text-skye-dark focus:text-skye-dark{{ if $isCurrentSection }} text-skye-dark{{ end }}">
         {{ $itemTitle }}
-      </a>
+        {{ if .Context.Params.premium }}{{ partial "premium-features/badge" }}{{ end }}
+        {{ if .Context.Params.beta}}{{ partial "beta-features/badge" }}{{ end }}
+        {{ if .Context.Params.partner }}{{ partial "white-labels/badge" }}{{ end }}
+      </a> 
       
     </h4>
 
     <!-- Add button for expanding if has children-->
-    {{ if eq .Context.Kind "section" }}
+    {{ if and ( eq .Context.Kind "section" ) ( gt ( len .Context.Pages ) 0  ) }}
       {{ partial "sidebar/expand-button" (dict "itemID" $sectionId "isCurrentSection" $isCurrentSection "expandLevel" "topExpanded" )}}
     {{ end }}
   </div>
   <ul x-show="topExpanded" class="pl-12" aria-labelledby="nav-expand-{{ $sectionId }}" id="{{ $sectionId }}">
 
-  <!-- Add the homepage as the first entry of the first section -->
-  {{ if eq "overview" $currentSection }}
-    <li>
-      <div class="py-2 pl-4">
-        <a href="/" class="hover:text-skye-dark focus:text-skye-dark{{ if $currentPage.IsHome }} text-skye-dark{{ end }}">
-            {{ .Context.Site.Home.Title }}
-        </a>
-      </div>
-    </li>
-  {{ end }}
 
   <!-- Loop through pages in the section -->
   {{ range .Context.Pages }}
@@ -102,6 +93,8 @@
           <a href="{{ .RelPermalink }}" destination="{{ .RelPermalink }}" {{ $getStartedAttribute | safeHTMLAttr }} class="hover:text-skye-dark focus:text-skye-dark{{ if $isCurrentSection }} text-skye-dark{{ end }}">
               {{ $itemTitle }}
               {{ if .Params.premium }}{{ partial "premium-features/badge" }}{{ end }}
+              {{ if .Params.beta}}{{ partial "beta-features/badge" }}{{ end }}
+              {{ if .Params.partner }}{{ partial "white-labels/badge" }}{{ end }}
           </a>
 
           <!-- If this item has children -->
@@ -125,6 +118,7 @@
                     <a href="{{ .RelPermalink }}" class="hover:text-skye-dark focus:text-skye-dark{{ if eq $currentPage . }} text-skye-dark{{ end }}">
                         {{ if isset .Params "sidebartitle" }}{{ .Params.sidebarTitle | .RenderString }}{{ else }}{{ .Title | .RenderString }}{{ end }}
                         {{ if .Params.premium }}{{ partial "premium-features/badge" }}{{ end }}
+                        {{ if .Params.beta}}{{ partial "beta-features/badge" }}{{ end }}
                     </a>
                   </li>
                 {{ end }}

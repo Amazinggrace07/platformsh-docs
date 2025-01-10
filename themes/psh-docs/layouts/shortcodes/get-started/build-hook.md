@@ -1,3 +1,4 @@
+<!-- shortcode start {{ .Name }} -->
 <div x-show="stack === 'python' || stack === 'nodejs' || stack === 'golang' || stack === 'java'">
 
 To build your app, you may also need to add commands to go through the build process.
@@ -31,7 +32,7 @@ Add something similar to the following to the end of the file you just added:
 
 <div role="tabpanel" x-show="frametech === 'default' || frametech === 'pipenv'" :aria-hidden="frametech === 'default' || frametech === 'pipenv'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
     build: pipenv install --system --deploy
 ```
@@ -40,7 +41,7 @@ hooks:
 
 <div role="tabpanel" x-show="frametech === 'poetry'" :aria-hidden="frametech === 'poetry'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
     build: |
         # Fail the build if any part fails
@@ -93,7 +94,7 @@ hooks:
 
 <div role="tabpanel" x-show="frametech === 'default'" :aria-hidden="frametech === 'default'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
     build: npm run build
 ```
@@ -102,7 +103,7 @@ hooks:
 
 <div role="tabpanel" x-show="frametech === 'yarn3'" :aria-hidden="frametech === 'yarn3'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
     build: |
         # Fail the build if any part fails
@@ -115,7 +116,7 @@ hooks:
 
 <div role="tabpanel" x-show="frametech === 'yarnOld'" :aria-hidden="frametech === 'yarnOld'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
     build: |
         # Fail the build if any part fails
@@ -130,7 +131,7 @@ hooks:
 
 <div x-show="stack === 'golang'">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
     # Make sure the output matches your start command
     build:  go build -o bin/app
@@ -163,7 +164,7 @@ hooks:
 
 <div role="tabpanel" x-show="frametech === 'default'" :aria-hidden="frametech === 'default'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
     build: mvn clean package
 ```
@@ -174,7 +175,7 @@ hooks:
 
 Assuming you've committed Gradle to your repository.
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
     build: ./gradlew clean build --no-daemon
 ```
@@ -182,3 +183,4 @@ hooks:
 </div>
 
 </div>
+<!-- shortcode end {{ .Name }} -->

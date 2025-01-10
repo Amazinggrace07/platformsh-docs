@@ -6,7 +6,7 @@ description: |
     Configure Redis for your WordPress site.
 ---
 
-There are a number of Redis plugins for WordPress, only some of which are compatible with {{< vendor/name >}}.
+There are a number of Redis plugins for WordPress, only some of which are compatible with {{% vendor/name %}}.
 We've tested and recommend [WP Redis](https://wordpress.org/plugins/wp-redis/)
 and [Redis Object Cache](https://wordpress.org/plugins/redis-cache/),
 both of which require a minimal amount of configuration.
@@ -17,9 +17,9 @@ both of which require a minimal amount of configuration.
 
 To create a Redis service, add the following to your [services configuration](../../add-services/_index.md):
 
-```yaml {location=".platform/services.yaml"}
+```yaml {configFile="services"}
 rediscache:
-    type: redis:6.0
+  type: redis:6.0
 ```
 
 That creates a service named `rediscache` with the type `redis`, specifically version `6.0`.
@@ -30,9 +30,9 @@ Next open a connection to the new Redis service.
 In the `relationships` section of your [app configuration](../../create-apps/_index.md),
 add the following:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 relationships:
-    redis: "rediscache:redis"
+  redis: "rediscache:redis"
 ```
 
 The key (left side) is the name that's exposed to the application in the [`PLATFORM_RELATIONSHIPS` variable](../../development/variables/use-variables.md#use-provided-variables).
@@ -43,7 +43,7 @@ If you named the service something different in step 1, change `rediscache` to t
 
 Add the Redis extension for PHP in one of two ways:
 
-* In your [app configuration](../../create-apps/app-reference.md#extensions) (for extension versions tied to the PHP version)
+* In your [app configuration](/create-apps/app-reference/single-runtime-image.md#extensions) (for extension versions tied to the PHP version)
 * Using a [builder script](../../languages/php/redis.md) (if you need more control over the extension version)
 
 ### 4. Add the Redis library
@@ -77,7 +77,7 @@ Then commit the resulting changes to your `composer.json` and `composer.lock` fi
 
 To enable the Redis cache to work with WordPress,
 the `object-cache.php` file needs to be copied from the plugin's directory to the `wp-content` directory.
-Add the following line to the bottom of your `build` hook in your [app configuration](../../create-apps/app-reference.md#hooks),
+Add the following line to the bottom of your `build` hook in your [app configuration](/create-apps/app-reference/single-runtime-image.md#hooks),
 adjusting the paths based on where your plugins are located:
 
 {{< codetabs >}}
@@ -85,13 +85,13 @@ adjusting the paths based on where your plugins are located:
 title=WP Redis
 +++
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
-    build: |
-        ...
-        if [ -f wordpress/wp-content/plugins/wp-redis/object-cache.php ]; then
-            cp wordpress/wp-content/plugins/wp-redis/object-cache.php wordpress/wp-content/object-cache.php
-        fi
+  build: |
+    ...
+    if [ -f wordpress/wp-content/plugins/wp-redis/object-cache.php ]; then
+        cp wordpress/wp-content/plugins/wp-redis/object-cache.php wordpress/wp-content/object-cache.php
+    fi
 ```
 
 <--->
@@ -100,31 +100,31 @@ hooks:
 title=Redis Object Cache
 +++
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
-    build: |
-        ...
-        if [ -f wordpress/wp-content/plugins/redis-cache/includes/object-cache.php ]; then
-            cp wordpress/wp-content/plugins/redis-cache/includes/object-cache.php wordpress/wp-content/object-cache.php
-        fi
+  build: |
+    ...
+    if [ -f wordpress/wp-content/plugins/redis-cache/includes/object-cache.php ]; then
+        cp wordpress/wp-content/plugins/redis-cache/includes/object-cache.php wordpress/wp-content/object-cache.php
+    fi
 ```
 
 {{< /codetabs >}}
 
 It should now look something like:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
-    build: |
-        set -e
-        bash .platform-scripts/install-redis.sh 6.0.12
-        # Copy manually-provided plugins into the plugins directory.
-        # This allows manually-provided and composer-provided plugins to coexist.
-        rsync -a plugins/* wordpress/wp-content/plugins/
+  build: |
+    set -e
+    bash .platform-scripts/install-redis.sh 6.0.12
+    # Copy manually-provided plugins into the plugins directory.
+    # This allows manually-provided and composer-provided plugins to coexist.
+    rsync -a plugins/* wordpress/wp-content/plugins/
 
-        if [ -f wordpress/wp-content/plugins/redis-cache/includes/object-cache.php ]; then
-            cp wordpress/wp-content/plugins/redis-cache/includes/object-cache.php wordpress/wp-content/object-cache.php
-        fi
+    if [ -f wordpress/wp-content/plugins/redis-cache/includes/object-cache.php ]; then
+      cp wordpress/wp-content/plugins/redis-cache/includes/object-cache.php wordpress/wp-content/object-cache.php
+    fi
 ```
 
 Each plugin requires slightly different configuration.
@@ -184,7 +184,7 @@ Once you have committed the above changes and pushed, you need to activate the p
 
 ### Verifying Redis is running
 
-Run this command in a SSH session in your environment: `redis-cli -h redis.internal info`.
+Run this command in a SSH session in your environment: `{{% vendor/cli %}} redis info`.
 You should run it before you push all this new code to your repository.
 
 This should give you a baseline of activity on your Redis installation.

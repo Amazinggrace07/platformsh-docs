@@ -1,48 +1,91 @@
 ---
 title: "PHP"
-description: Deploy PHP apps on {{< vendor/name >}}.
+description: Deploy PHP apps on {{% vendor/name %}}.
 layout: single
 ---
 
+{{% note theme="info" %}}
+
+You can now use the {{% vendor/name %}} composable image (BETA) to install runtimes and tools in your application container.
+To find out more about this feature, see the [dedicated documentation page](/create-apps/app-reference/composable-image.md).</br>
+Also, see how you can [modify your PHP runtime when using a composable image](#modify-your-php-runtime-when-using-a-composable-image).
+
+{{% /note %}}
+
 ## Supported versions
 
-{{% major-minor-versions-note configMinor="true" %}}
+You can select the major and minor version.
 
-| Grid and {{% names/dedicated-gen-3 %}} | {{% names/dedicated-gen-2 %}} |
-|----------------------------------------|------------------------------ |
-| {{< image-versions image="php" status="supported" environment="grid" >}} | {{< image-versions image="php" status="supported" environment="dedicated-gen-2" >}} |
+Patch versions are applied periodically for bug fixes and the like. When you deploy your app, you always get the latest available patches.
+
+<table>
+    <thead>
+        <tr>
+            <th>Grid and {{% names/dedicated-gen-3 %}}</th>
+            <th>Dedicated Gen 2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{< image-versions image="php" status="supported" environment="grid" >}}</td>
+            <td>{{< image-versions image="php" status="supported" environment="dedicated-gen-2" >}}</thd>
+        </tr>
+    </tbody>
+</table>
 
 Note that from PHP versions 7.1 to 8.1, the images support the Zend Thread Safe (ZTS) version of PHP.
 
 {{% language-specification type="php" display_name="PHP" %}}
 
+```yaml {configFile="app"}
+type: 'php:<VERSION_NUMBER>'
+```
+
+For example:
+
+```yaml {configFile="app"}
+type: 'php:{{% latest "php" %}}'
+```
+
 {{% deprecated-versions %}}
 
-| Grid and {{% names/dedicated-gen-3 %}} | {{% names/dedicated-gen-2 %}} |
-|----------------------------------------|------------------------------ |
-| {{< image-versions image="php" status="deprecated" environment="grid" >}} | {{< image-versions image="php" status="deprecated" environment="dedicated-gen-2" >}} |
+<table>
+    <thead>
+        <tr>
+            <th>Grid and {{% names/dedicated-gen-3 %}}</th>
+            <th>Dedicated Gen 2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{< image-versions image="php" status="deprecated" environment="grid" >}}</td>
+            <td>{{< image-versions image="php" status="deprecated" environment="dedicated-gen-2" >}}</thd>
+        </tr>
+    </tbody>
+</table>
 
 ## Usage example
 
-Configure your app to use PHP on {{< vendor/name >}}.
+Configure your app to use PHP on {{% vendor/name %}}.
 
 ### 1. Specify the version
 
 Choose a [supported version](#supported-versions)
 and add it to your [app configuration](../../create-apps/_index.md):
 
-{{< readFile file="registry/images/examples/full/php.app.yaml" highlight="yaml" location=".platform.app.yaml" >}}
-
+```yaml {configFile="app"}
+type: 'php:{{% latest "php" %}}'
+```
 ### 2. Serve your app
 
-To serve your app, define what (and how) content should be served by setting the [`locations` parameter](../../create-apps/app-reference.md#locations).
+To serve your app, define what (and how) content should be served by setting the [`locations` parameter](/create-apps/app-reference/single-runtime-image.md#locations).
 
 Usually, it contains the two following (optional) keys:
 
 - `root` for the document root,
   the directory to which all requests for existing `.php` and static files (such as `.css`, `.jpg`) are sent.
 - `passthru` to [define a front controller](../../create-apps/web/php-basic.md#set-different-rules-for-specific-locations) to handle nonexistent files.
-  The value is a file path relative to the [app root](../../create-apps/app-reference.md#root-directory).
+  The value is a file path relative to the [app root](/create-apps/app-reference/single-runtime-image.md#root-directory).
 
   {{< note >}}
 
@@ -62,14 +105,13 @@ Adjust the `locations` block to fit your needs.
 In the following example, all requests made to your site's root (`/`) are sent to the `public` directory
 and nonexistent files are handled by `app.php`:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 web:
-    locations:
-        '/':
-            root: 'public'
-            passthru: '/app.php'
+  locations:
+    '/':
+      root: 'public'
+      passthru: '/app.php'
 ```
-
 See how to [create a basic PHP app with a front controller](../../create-apps/web/php-basic.md).
 To have more control, you can define rules to specify which files you want to allow [from which location](../../create-apps/web/php-basic.md#set-different-rules-for-specific-locations).
 
@@ -77,38 +119,36 @@ To have more control, you can define rules to specify which files you want to al
 
 A complete basic app configuration looks like the following:
 
-```yaml {location=".platform.app.yaml"}
-name: 'app'
+```yaml {configFile="app"}
+name: 'myapp'
 
-type: 'php:8.2'
+type: 'php:{{% latest "php" %}}'
 
 disk: 2048
 
 web:
-    locations:
-        '/':
-            root: 'public'
-            passthru: '/app.php'
+  locations:
+    '/':
+      root: 'public'
+      passthru: '/app.php'
 ```
-
 ## Dependencies
 
 Up to PHP version 8.1, it's assumed that you're using [Composer](https://getcomposer.org/) 1.x to manage dependencies.
-If you have a `composer.json` file in your code, the default [build flavor is run](../../create-apps/app-reference.md#build):
+If you have a `composer.json` file in your code, the default [build flavor is run](/create-apps/app-reference/single-runtime-image.md#build):
 
 ```bash
 composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader
 ```
 
-To use Composer 2.x on your project, either use PHP 8.2+ or, in your app configuration, add the following [dependency](../../create-apps/app-reference.md#dependencies):
+To use Composer 2.x on your project, either use PHP 8.2+ or, in your app configuration, add the following [dependency](/create-apps/app-reference/single-runtime-image.md#dependencies):
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 dependencies:
-    php:
-        composer/composer: '^2'
+  php:
+    composer/composer: '^2'
 ```
-
-Adding a dependency to the [dependencies block](../../create-apps/app-reference.md#dependencies) makes it available globally.
+Adding a dependency to the [dependencies block](/create-apps/app-reference/single-runtime-image.md#dependencies) makes it available globally.
 So you can then use included dependencies as commands within your app container.
 You can add multiple global dependencies to the dependencies block, such as [Node.js](../nodejs/_index.md#2-specify-any-global-dependencies).
 
@@ -124,7 +164,7 @@ or interact with Composer itself through [its environment variables](https://get
 You can remove the default build flavor and run your own commands for complete control over your build.
 Set the build flavor to `none` and add the commands you need to your `build` hook, as in the following example:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 build:
     flavor: none
 
@@ -133,11 +173,10 @@ hooks:
         set -e
         composer install --no-interaction --no-dev
 ```
-
 That installs production dependencies with Composer but not development dependencies.
 The same can be achieved by using the default build flavor and [adding the `COMPOSER_NO_DEV` variable](../../development/variables/set-variables.md).
 
-See more on [build flavors](../../create-apps/app-reference.md#build).
+See more on [build flavors](/create-apps/app-reference/single-runtime-image.md#build).
 
 ### Alternative repositories
 
@@ -149,44 +188,42 @@ To install from an alternative repository:
 
 1. Set an explicit `require` block:
 
-   ```yaml {location=".platform.app.yaml"}
-   dependencies:
-       php:
-           require:
-               "platformsh/client": "2.x-dev"
-   ```
+```yaml {configFile="app"}
+dependencies:
+  php:
+    require:
+      "platformsh/client": "2.x-dev"
+```
+   This is equivalent to `composer require platformsh/client 2.x-dev`.
 
-   This is equivalent to `composer require platform/client 2.x-dev`.
 2. Add the repository to use:
 
-   ```yaml {location=".platform.app.yaml"}
-           repositories:
-               - type: vcs
-                   url: "git@github.com:platformsh/platformsh-client-php.git"
-   ```
-
+```yaml {configFile="app"}
+repositories:
+  - type: vcs
+    url: "git@github.com:platformsh/platformsh-client-php.git"
+```
 That installs `platformsh/client` from the specified repository URL as a global dependency.
 
-For example, to install Composer 2 and the `platform/client 2.x-dev` library from a custom repository,
+For example, to install Composer 2 and the `platformsh/client 2.x-dev` library from a custom repository,
 use the following:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 dependencies:
-    php:
-        composer/composer: '^2'
-        require:
-            "platformsh/client": "2.x-dev"
-        repositories:
-            - type: vcs
-                url: "git@github.com:platformsh/platformsh-client-php.git"
+  php:
+    composer/composer: '^2'
+    require:
+      "platformsh/client": "2.x-dev"
+    repositories:
+      - type: vcs
+        url: "git@github.com:platformsh/platformsh-client-php.git"
 ```
-
 ## Connect to services
 
 The following examples show how to use PHP to access various [services](../../add-services/_index.md).
 The individual service pages have more information on configuring each service.
 
-{{< codetabs >}}
+{{< codetabs v2hide="true" >}}
 
 +++
 title=Elasticsearch
@@ -264,7 +301,7 @@ markdownify=false
 
 ## PHP settings
 
-You can configure your PHP-FPM runtime configuration by specifying the [runtime in your app configuration](../../create-apps/app-reference.md#runtime).
+You can configure your PHP-FPM runtime configuration by specifying the [runtime in your app configuration](/create-apps/app-reference/single-runtime-image.md#runtime).
 
 In addition to changes in runtime, you can also change the PHP settings.
 Some commonly used settings are:
@@ -286,14 +323,14 @@ Some commonly used settings are:
 To retrieve the default PHP values, run the following [CLI command](../../administration/cli/_index.md):
 
 ```bash
-platform ssh "php --info"
+{{% vendor/cli %}} ssh "php --info"
 ```
 
 To get specific default values, use grep.
 For example, to get the value for `opcache.memory_consumption`, run the following command:
 
 ```bash
-platform ssh "php --info" | grep opcache.memory_consumption
+{{% vendor/cli %}} ssh "php --info" | grep opcache.memory_consumption
 ```
 
 ### Retrieve the settings
@@ -303,7 +340,7 @@ To see the settings used on your environment:
 1.  Find the PHP configuration files with the following [CLI command](../../administration/cli/_index.md):
 
     ```bash
-    platform ssh "php --ini"
+    {{% vendor/cli %}} ssh "php --ini"
     ```
 
     The output is something like the following:
@@ -318,12 +355,12 @@ To see the settings used on your environment:
 2.  Display the configuration file by adapting the following command with the output from step 1:
 
     ```bash
-    platform ssh "cat {{< variable "LOADED_CONFIGURATION_FILE_PATH" >}}"
+    {{% vendor/cli %}} ssh "cat {{< variable "LOADED_CONFIGURATION_FILE_PATH" >}}"
     ```
 
 ### Customize PHP settings
 
-For {{% names/dedicated-gen-2 %}}, see the [configuration options](../../dedicated-gen-2/overview/grid.md#configuration-options).
+For {{% names/dedicated-gen-2 %}}, see the [configuration options](/dedicated-environments/dedicated-gen-2/development).
 
 You can customize PHP values for your app in two ways.
 The recommended method is to use variables.
@@ -339,7 +376,10 @@ Set variables to override PHP settings for a given environment using the [CLI](.
 For example, to set the PHP memory limit to 256 MB on a specific environment, run the following CLI command:
 
 ```bash
-platform variable:create --level environment --prefix php --name memory_limit --value 256M --environment {{< variable "ENVIRONMENT_NAME" >}} --no-interaction
+{{% vendor/cli %}} variable:create --level environment \
+    --prefix php --name memory_limit \
+    --value 256M --environment {{< variable "ENVIRONMENT_NAME" >}} \
+    --no-interaction
 ```
 
 For more information, see how to use [PHP-specific variables](../../development/variables/_index.md#php-specific-variables).
@@ -350,7 +390,7 @@ For more information, see how to use [PHP-specific variables](../../development/
 title=Using `php.ini`
 +++
 
-You can provide a custom `php.ini` file at the [app root](../../create-apps/app-reference.md#root-directory).
+You can provide a custom `php.ini` file at the [app root](/create-apps/app-reference/single-runtime-image.md#root-directory).
 Using this method isn't recommended since it offers less flexibility and is more error-prone.
 Consider using variables instead.
 
@@ -375,18 +415,17 @@ memory_limit=-1
 ### Disable functions for security
 
 A common recommendation for securing PHP installations is disabling built-in functions frequently used in remote attacks.
-By default, {{< vendor/name >}} doesn't disable any functions.
+By default, {{% vendor/name %}} doesn't disable any functions.
 
 If you're sure a function isn't needed in your app, you can disable it.
 
 For example, to disable `pcntl_exec` and `pcntl_fork`, add the following to your [app configuration](../../create-apps/_index.md):
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 variables:
     php:
         disable_functions: "pcntl_exec,pcntl_fork"
 ```
-
 Common functions to disable include:
 
 | Name | Description |
@@ -402,20 +441,20 @@ Common functions to disable include:
 PHP has two execution modes you can choose from:
 
 - The command line interface mode (PHP-CLI) is the mode used for command line scripts and standalone apps.
-  This is the mode used when you're logged into your container via SSH, for [crons](../../create-apps/app-reference.md#crons),
+  This is the mode used when you're logged into your container via SSH, for [crons](/create-apps/app-reference/single-runtime-image.md#crons),
   and usually also for [alternate start commands](#alternate-start-commands).
   To use PHP-CLI, run your script with `php {{<variable "PATH_TO_SCRIPT" >}}`,
-  where {{<variable "PATH_TO_SCRIPT" >}} is a file path relative to the [app root](../../create-apps/app-reference.md#root-directory).
+  where {{<variable "PATH_TO_SCRIPT" >}} is a file path relative to the [app root](/create-apps/app-reference/single-runtime-image.md#root-directory).
 - The Common Gateway Interface mode (PHP-CGI) is the mode used for web apps and web requests.
   This is the default mode when the `start` command isn't explicitly set.
   To use PHP-CGI, run your script with a symlink: `/usr/bin/start-php-app {{<variable "PATH_TO_SCRIPT" >}}`,
-  where {{<variable "PATH_TO_SCRIPT" >}} is a file path relative to the [app root](../../create-apps/app-reference.md#root-directory).
+  where {{<variable "PATH_TO_SCRIPT" >}} is a file path relative to the [app root](/create-apps/app-reference/single-runtime-image.md#root-directory).
   With PHP-CGI, PHP is run using the FastCGI Process Manager (PHP-FPM).
 
 ## Alternate start commands
 
 To specify an alternative process to run your code, set a `start` command.
-For more information about the start command, see the [web commands reference](../../create-apps/app-reference.md#web-commands).
+For more information about the start command, see the [web commands reference](/create-apps/app-reference/single-runtime-image.md#web-commands).
 
 By default, start commands use PHP-CLI.
 Find out how and when to use each [execution mode](#execution-mode).
@@ -437,13 +476,13 @@ title=Run a custom script
 1. Add your script in a PHP file.
 2. Specify an alternative `start` command by adapting the following:
 
-   ```yaml {location=".platform.app.yaml"}
-   web:
-        commands:
-            start: /usr/bin/start-php-app {{< variable "PATH_TO_APP" >}}
-   ```
-
-   {{<variable "PATH_TO_APP" >}} is a file path relative to the [app root](../../create-apps/app-reference.md#root-directory).
+```yaml {configFile="app"}
+{{< snippet name="myapp" config="app" root="myapp" >}}
+web:
+    commands:
+        start: /usr/bin/start-php-app
+{{< /snippet >}}
+```
 
 <--->
 
@@ -455,37 +494,41 @@ title=Run a custom web server
 
 2.  Specify an alternative `start` command by adapting the following:
 
-    ```yaml {location=".platform.app.yaml"}
-    web:
-        commands:
-            start: /usr/bin/start-php-app {{< variable "PATH_TO_APP" >}}
-    ```
-
-    {{<variable "PATH_TO_APP" >}} is a file path relative to the [app root](../../create-apps/app-reference.md#root-directory).
+```yaml {configFile="app"}
+{{< snippet name="myapp" config="app" root="myapp" >}}
+web:
+    commands:
+        start: /usr/bin/start-php-app
+{{< /snippet >}}
+```
 
 3.  Configure the container to listen on a TCP socket:
 
-    ```yaml {location=".platform.app.yaml"}
-    web:
-        upstream:
-            socket_family: tcp
-            protocol: http
-    ```
+```yaml {configFile="app"}
+{{< snippet name="myapp" config="app" root="myapp" >}}
+web:
+    upstream:
+        socket_family: tcp
+        protocol: http
+{{< /snippet >}}
+```
 
-    When you listen on a TCP socket, the `$PORT` environment variable is automatically set.
-    See more options on how to [configure where requests are sent](../../create-apps/app-reference.md#upstream).
-    You might have to configure your app to connect via the `$PORT` TCP socket,
-    especially when using web servers such as [Swoole](swoole.md) or [Roadrunner](https://github.com/roadrunner-server/roadrunner).
+   When you listen on a TCP socket, the `$PORT` environment variable is automatically set.
+   See more options on how to [configure where requests are sent](/create-apps/app-reference/single-runtime-image.md#upstream).
+   You might have to configure your app to connect via the `$PORT` TCP socket,
+   especially when using web servers such as [Swoole](swoole.md) or [Roadrunner](https://github.com/roadrunner-server/roadrunner).
 
 4.  Optional: Override redirects to let the custom web server handle them:
 
-    ```yaml {location=".platform.app.yaml"}
-    locations:
-        "/":
-            passthru: true
-            scripts: false
-            allow: false
-    ```
+```yaml {configFile="app"}
+{{< snippet name="myapp" config="app" root="myapp" >}}
+locations:
+    "/":
+        passthru: true
+        scripts: false
+        allow: false
+{{< /snippet >}}
+```
 
 <--->
 
@@ -499,14 +542,16 @@ To execute runtime-specific tasks (such as clearing cache) before your app start
 
 2.  Specify an alternative `start` command by adapting the following:
 
-    ```yaml {location=".platform.app.yaml"}
-    web:
-        commands:
-            start: bash {{< variable "PATH_TO_SCRIPT" >}} && /usr/bin/start-php-app {{< variable "PATH_TO_APP" >}}
-    ```
+```yaml {configFile="app"}
+{{< snippet name="myapp" config="app" root="myapp" >}}
+web:
+    commands:
+        start: bash {{< variable "PATH_TO_SCRIPT" >}} && /usr/bin/start-php-app
+{{< /snippet >}}
+```
 
-    {{<variable "PATH_TO_SCRIPT" >}} is the bash script created in step 1.
-    Both {{<variable "PATH_TO_SCRIPT" >}} and {{<variable "PATH_TO_APP" >}} are file paths relative to the [app root](../../create-apps/app-reference.md#root-directory).
+   {{<variable "PATH_TO_SCRIPT" >}} is the bash script created in step 1.
+   {{<variable "PATH_TO_SCRIPT" >}} is a file path relative to the [app root](/create-apps/app-reference/single-runtime-image.md#root-directory).
 
 {{< /codetabs >}}
 
@@ -530,11 +575,11 @@ To leverage FFIs, follow these steps:
 
 2.  Enable the FFI extension:
 
-    ```yaml {location=".platform.app.yaml"}
-    runtime:
-       extensions:
-            - ffi
-    ```
+```yaml {configFile="app"}
+runtime:
+    extensions:
+        - ffi
+```
 
 3.  Make sure that your [preload script](./tuning.md#opcache-preloading) calls the `FFI::load()` function.
     Using this function in preload is considerably faster than loading the linked library on each request or script run.
@@ -542,11 +587,11 @@ To leverage FFIs, follow these steps:
 4.  If you are running FFIs from the command line,
     enable the preloader by adding the following configuration:
 
-    ```yaml {location=".platform.app.yaml"}
-    variables:
-        php:
-            opcache.enable_cli: true
-    ```
+```yaml {configFile="app"}
+variables:
+    php:
+        opcache.enable_cli: true
+```
 
 5.  Run your script with the following command:
 
@@ -559,3 +604,59 @@ See [complete working examples for C and Rust](https://github.com/platformsh-exa
 ## Project templates
 
 {{< repolist lang="php" displayName="PHP" >}}
+
+## Modify your PHP runtime when using a composable image
+
+{{% note theme= "warning" %}}
+
+This section is only relevant when using the {{% vendor/name %}} [composable image (BETA)](/create-apps/app-reference/composable-image.md).
+
+{{% /note %}}
+
+The following table presents the possible modifications you can make to your PHP primary runtime using the `stack` key and composable image.
+Each modification should be listed below the stack chosen (i.e. `extensions` are enabled under `.applications.frontend.stack[0]["php@8.3"].extensions` for PHP 8.3).
+See the example below for more details.
+
+| Name                        | Type                                                       | Description                                                                                |
+|-----------------------------|------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| `extensions`                | List of `string`s OR [extensions definitions](/create-apps/app-reference/composable-image#php-extensions-and-python-packages) | [PHP extensions](/languages/php/extensions.md) to enable.                                  |
+| `disabled_extensions`       | List of `string`s                                          | [PHP extensions](/languages/php/extensions.md) to disable.                                 |
+| `request_terminate_timeout` | `integer`                                                  | The timeout for serving a single request after which the PHP-FPM worker process is killed. |
+| `sizing_hints`              | A [sizing hints definition](/create-apps/app-reference/composable-image#sizing-hints)                 | The assumptions for setting the number of workers in your PHP-FPM runtime.                 |
+| `xdebug`                    | An Xdebug definition                                       | The setting to turn on [Xdebug](/languages/php/xdebug.md).                                 |
+
+Here is an example configuration:
+
+```yaml {configFile="app"}
+name: frontend
+
+stack:
+    - "php@8.3":
+        extensions:
+          - apcu # A PHP extension made available to the PHP runtime
+          - sodium
+          - xsl
+          - pdo_sqlite
+
+        xdebug:
+          idekey: YOUR_KEY
+
+        disabled_extensions:
+          - gd
+
+        request_terminate_timeout: 200
+
+        sizing_hints:
+          request_memory: 45
+          reserved_memory: 70
+
+    - "php83Extensions.apcu" # A PHP extension made available to all runtimes.
+    - "python@3.12"
+    - "python312Packages.yq"
+```
+
+{{% note %}}
+
+You can also set your [app's runtime timezone](/create-apps/timezone.md).
+
+{{% /note %}}

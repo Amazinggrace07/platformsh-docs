@@ -1,0 +1,115 @@
+# Basics
+#baseURL: /
+title: Upsun Docs
+author: Upsun
+description: Upsun User Documentation
+
+# Themes
+theme: psh-docs
+themesdir: '../../themes'
+
+uglyurls: true
+pygmentsUseClasses: true
+
+# Language settings
+languages:
+  en:
+    languageName: English
+    weight: 10
+
+disableKinds: ["taxonomy"]
+
+baseURL: "https://docs.upsun.com"
+
+summaryLength: 3
+
+outputs:
+    home:
+      - HTML
+      - JSON
+      - RSS
+      - devcenter
+      - llms
+      - llms-full
+    section:
+      - HTML
+      - RSS
+
+outputFormats:
+  devcenter:
+    mediaType: "application/json"
+    baseName: "json/devcenter"
+    isPlainText: true
+  llms:
+    mediaType: "text/plain"
+    baseName: "llms"
+    isPlainText: true
+    permalinkable: true
+  llms-full:
+    mediaType: "text/plain"
+    baseName: "llms-full"
+    isPlainText: true
+    permalinkable: true
+
+mediaTypes:
+  text/plain:
+    suffixes: ["txt"]
+
+# Math typesetting as per 0.125.0 - https://gohugo.io/content-management/mathematics/
+markup:
+    goldmark:
+        renderer:
+            unsafe: true
+    # goldmark:
+        extensions:
+            passthrough:
+                delimiters:
+                    block:
+                    - - \[
+                      - \]
+                    - - $$
+                      - $$
+                    inline:
+                    - - \(
+                      - \)
+            enable: true
+params:
+    math: true
+
+module:
+    _merge: deep
+    mounts:
+        - source: "node_modules/mermaid/dist"
+          target: "static/mermaid"
+        - source: "node_modules/asciinema-player/dist/bundle"
+          target: "static/asciinema"
+        - source: "node_modules/alpinejs/dist"
+          target: "static/alpinejs"
+
+        - source: "../../shared/data"
+          target: "data"
+
+        - source: "../platform/static/images"
+          target: "static/images"
+        - source: "../platform/static/videos"
+          target: "static/videos"
+        - source: "static/scripts"
+          target: "static/scripts"
+        - source: "static/files"
+          target: "static/files"
+
+        - source: "src"
+          target: "content"
+        - source: "static/images"
+          target: "static/images"
+
+
+
+security:
+  funcs:
+    getenv:
+    - ^GITHUB_
+    - ^HUGO_HEAP_ID
+  http:
+    methods:
+    - GET

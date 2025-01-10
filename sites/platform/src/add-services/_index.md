@@ -7,14 +7,13 @@ keywords:
   - "services.yaml"
 ---
 
-{{< vendor/name >}} includes many services, so you don't have to subscribe to external cache or search engine services.
+{{% vendor/name %}} includes many services, so you don't have to subscribe to external cache or search engine services.
 Because the services are included in your project, you can manage them through Git
 and they're backed up together with the rest of your project.
 
-Your project defines the services configuration in a file named `services.yaml` located in the `{{< vendor/configdir >}}` directory.
-If you don't need any services (such as for a static website), you don't need to include this file in your repository.
+Your project defines the services configuration in a file named `{{< vendor/configfile "services" >}}`.
 
-Read on to see how to add services.
+If you don't need any services (such as for a static website), you don't need to include this configuration. Read on to see how to add services.
 
 ![Services](/images/management-console/relationships.png "0.50")
 
@@ -24,36 +23,40 @@ Adding a service is a two-step process.
 
 ### 1. Configure the service
 
-All service configuration happens in the services configuration file (`{{< vendor/configdir >}}/services.yaml`) in your Git repository.
+All service configuration happens in the `{{< vendor/configfile "services" >}}` file in your Git repository.
 
 Configure your service in the following pattern:
 
-```yaml {location=".platform/services.yaml"}
-{{<variable "SERVICE_NAME" >}}:
-    type: {{<variable "SERVICE_TYPE" >}}:{{<variable "VERSION" >}}
-    # Other options...
+```yaml {configFile="services"}
+# The name of the service container. Must be unique within a project.
+SERVICE_NAME:
+  type: <SERVICE_TYPE>:<VERSION>
+  # Other options...
 ```
 
 An example service configuration for two databases might look like this:
 
-```yaml {location=".platform/services.yaml"}
-database1:
-    type: mariadb:10.5
-    disk: 2048
-database2:
-    type: postgresql:13
-    disk: 1024
+```yaml {configFile="services"}
+# The name of the service container. Must be unique within a project.
+mariadb:
+  type: mariadb:{{% latest "mariadb" %}}
+  disk: 2048
+# The name of the service container. Must be unique within a project.
+postgresql:
+  type: postgresql:{{% latest "postgresql" %}}
+  disk: 1024
 ```
 
 This YAML file is a dictionary defining all of the services you want to use.
-The top-level key is a custom service name, which you use to identify the service in step 2.
+The top-level key is a custom service name (``<SERVICE_NAME>``: in the example, `mariadb` and `postgresql`), which you use to identify the service in step 2.
+
 You can give it any name you want with lowercase alphanumeric characters, hyphens, and underscores.
 
 {{< note >}}
 
 Changing the service name is interpreted as creating an entirely new service.
 This **removes all data in that service**.
-Always back up your data before changing existing services in your `.platform/services.yaml` file.
+Always back up your data before changing existing services in your `{{< vendor/configfile "services" >}}` file.
 
 {{< /note >}}
 
@@ -64,47 +67,149 @@ The following table presents the keys you can define for each service:
 | Name            | Type       | Required          | Description |
 | --------------- | ---------- | ----------------- | ----------- |
 | `type`          | `string`   | Yes               | One of the [available services](#available-services) in the format `type:version`. |
-| `disk`          | `integer`  | For some services | The size in [MB](../other/glossary.md#mb) of the [persistent disk](#disk) allocated to the service. Can't be set for memory-resident-only services such as `memcache` and `redis`. Limited by your plan settings. |
+| `disk`          | `integer`  | For some services | The size in [MB](/glossary.md#mb) of the [persistent disk](#disk) allocated to the service. Can't be set for memory-resident-only services such as `memcache` and `redis`. Limited by your plan settings. |
 | `size`          | `string`   |                   | How many CPU and memory [resources to allocate](#size) to the service. Possible values are `AUTO`, `S`, `M`, `L`, `XL`, `2XL`, and `4XL`. Limited by your plan settings.<BR><BR>When `AUTO` applies, available resources are automatically balanced out based on the number of containers on your plan, so that no container is oversized compared to the others. To view the actual sizes of your containers, check the **Environment Configuration** section in your deployment [activity logs](../increase-observability/logs/access-logs.md#activity-logs). |
 | `configuration` | dictionary | For some services | Some services have additional specific configuration options that can be defined here, such as specific endpoints. See the given service page for more details. |
-| `relationships` | dictionary | For some services | Some services require a relationship to your app. The content of the dictionary has the same type as the `relationships` dictionary for [app configuration](../create-apps/app-reference.md#relationships). The `endpoint_name` for apps is always `http`. |
-
-
+| `relationships` | dictionary | For some services | Some services require a relationship to your app. The content of the dictionary has the same type as the `relationships` dictionary for [app configuration](/create-apps/app-reference/single-runtime-image.md#relationships). The `endpoint_name` for apps is always `http`. |
 
 ##### Disk
 
-{{% disk-space-mb %}}
+You configure the disk size in [MB](/glossary.md#mb).
+Your actual available disk space is slightly smaller with some space used for formatting and the filesystem journal.
+When checking available space, note whether it's reported in MB or MiB.
 
-{{% disk-downsize type="service" %}}
+You can decrease the size of an existing disk for a service.
+If you do so, be aware that:
+
+- The downsize fails if there's more data on the disk than the desired size.
+- Backups from before the downsize can still be restored.
 
 ##### Size
 
 Resources are distributed across all containers in a project from the total available from your [plan size](../administration/pricing/_index.md).
 
-By default, {{< vendor/name >}} allocates CPU and memory resources to each container automatically.
+By default, {{% vendor/name %}} allocates CPU and memory resources to each container automatically.
 Some services are optimized for high CPU load, some for high memory load.
 If your plan is sufficiently large for bigger containers, you can increase the size of your service container.
 
-Note that service containers in development environments are always set to size `S`.
+Note that service containers in preview environments are always set to size `S`.
 
 ### 2. Connect the service
 
 Once you have configured a service, you need to create a relationship to connect it to an app.
-This is done in your [app configuration for relationships](../create-apps/app-reference.md#relationships).
+This is done in your [app configuration for relationships](/create-apps/app-reference/single-runtime-image.md#relationships).
 
 The relationship follows this pattern:
 
-```yaml {location=".platform.app.yaml"}
+{{< codetabs >}}
+
++++
+title=Using default endpoints
++++
+
+```yaml {configFile="app"}
+name: myapp
+
+# Other options...
+
+# Relationships enable an app container's access to a service.
+# The example below shows simplified configuration leveraging a default service (identified from the relationship name) and a default endpoint.
+# See the Application reference for all options for defining relationships and endpoints.
 relationships:
-    {{< variable "RELATIONSHIP_NAME" >}}: "{{< variable "SERVICE_NAME" >}}:{{< variable "ENDPOINT" >}}"
+  <SERVICE_NAME>:
 ```
+
+You can define `<SERVICE_NAME>` as you like, so long as it's unique between all defined services
+and matches in both the application and services configuration.
+
+The example above leverages [default endpoint](/create-apps/app-reference/single-runtime-image#relationships) configuration for relationships.
+That is, it uses default endpoints behind-the-scenes, providing a [relationship](/create-apps/app-reference/single-runtime-image#relationships)
+(the network address a service is accessible from) that is identical to the _name_ of that service.
+
+Depending on your needs, instead of default endpoint configuration,
+you can use [explicit endpoint configuration](/create-apps/app-reference/single-runtime-image#relationships).
+
+<--->
+
++++
+title=Using explicit endpoints
++++
+
+```yaml {configFile="app"}
+# Relationships enable access from this app to a given service.
+# The example below shows configuration with an explicitly set service name and endpoint.
+# See the Application reference for all options for defining relationships and endpoints.
+# Note that legacy definition of the relationship is still supported.
+# More information: https://docs.platform.sh/create-apps/app-reference/single-runtime-image.html#relationships
+relationships:
+  <RELATIONSHIP_NAME>:
+    service: <SERVICE_NAME>
+    endpoint: <ENDPOINT_NAME>
+```
+
+You can define ``<SERVICE_NAME>`` and ``<RELATIONSHIP_NAME>`` as you like, so long as it's unique between all defined services and relationships
+and matches in both the application and services configuration. `<ENDPOINT_NAME>` is the endpoint your app will use to connect to the service (refer to the service reference to know which value to use).
+
+The example above leverages [explicit endpoint](/create-apps/app-reference/single-runtime-image#relationships) configuration for relationships.
+
+Depending on your needs, instead of explicit endpoint configuration,
+you can use [default endpoint configuration](/create-apps/app-reference/single-runtime-image#relationships).
+
+With the above definition, the application container now has access to the service via the relationship `<RELATIONSHIP_NAME>` and its corresponding [`PLATFORM_RELATIONSHIPS` environment variable](/development/variables/use-variables.md#use-provided-variables).
+
+{{< /codetabs >}}
 
 An example relationship to connect to the databases given in the [example in step 1](#1-configure-the-service):
 
-```yaml {location=".platform.app.yaml"}
+{{< codetabs >}}
+
++++
+title=Using default endpoints
++++
+
+```yaml {configFile="app"}
+name: myapp
+# Other options...
+
+# Relationships enable an app container's access to a service.
 relationships:
-    mysql_database: "database1:mysql"
-    postgresql_database: "database2:postgresql"
+  mariadb:
+  postgresql:
+```
+
+<--->
+
++++
+title=Using explicit endpoints
++++
+
+```yaml {configFile="app"}
+name: myapp
+# Other options...
+
+# Relationships enable access from this app to a given service.
+# The example below shows configuration with explicitly set service names and endpoints.
+# See the Application reference for all options for defining relationships and endpoints.
+# Note that legacy definition of the relationship is still supported.
+# More information: https://docs.platform.sh/create-apps/app-reference/single-runtime-image.html#relationships
+relationships:
+  mariadb:
+    service: mariadb
+    endpoint: mysql
+  postgresql:
+    service: postgresql
+    endpoint: mysql
+```
+
+{{< /codetabs >}}
+
+```yaml {configFile="services"}
+mariadb:
+  type: mariadb:{{% latest "mariadb" %}}
+  disk: 2048
+postgresql:
+  type: postgresql:{{% latest "postgresql" %}}
+  disk: 1024
 ```
 
 As with the service name, you can give the relationship any name you want
@@ -150,14 +255,11 @@ You can connect through your app or by opening an SSH tunnel to access the servi
 title=In an app
 +++
 
-When connecting to a service from an app, you may want to use one of the {{< vendor/name >}} [configuration readers](https://github.com/platformsh/?q=config+reader).
-These tools make it easier to get credentials inside your app.
+Once a service is running and exposed as a relationship,
+its credentials (such as the host, username, and password) are available through the `{{% vendor/prefix %}}_RELATIONSHIPS` environment variable.
+The available information is documented on each service's page, along with sample code for how to connect to it from your app.
 
-Alternatively, once a service is running and exposed as a relationship,
-its credentials (such as the host, username, and password) are available through the `PLATFORM_RELATIONSHIPS` environment variable.
-The available information is documented on each service's page along with sample code for how to connect to it from your app.
-
-The keys in the `PLATFORM_RELATIONSHIPS` variable are fixed, but the values may change on deployment or restart.
+The keys in the `{{< vendor/prefix >}}_RELATIONSHIPS` variable are fixed, but the values may change on deployment or restart.
 So **use the environment variable** rather than hard coding the values.
 
 <--->
@@ -169,50 +271,49 @@ Connecting to a service using an SSH tunnel is a two-step process.
 
 ### 1. Obtain service credentials
 
-
 To get the credentials for a given service, run the following command:
 
 ```bash
-platform relationships
+{{% vendor/cli %}} relationships
 ```
 
 You get output like the following:
 
-```bash
-database:
-    -
-        username: user
-        scheme: mysql
-        service: database
-        fragment: null
-        ip: 198.51.100.37
-        hostname: abcdefghijklm1234567890123.database.service._.eu.platformsh.site
-        public: false
-        cluster: abcdefgh1234567-main-abcd123
-        host: database.internal
-        rel: mysql
-        query:
-            is_master: true
-        path: main
-        password: ''
-        type: 'mariadb:10.6'
-        port: 3306
-        host_mapped: false
-        url: 'mysql://user:@database.internal:3306/main'
+```yaml
+mariadb:
+  -
+    username: user
+    scheme: mysql
+    service: mariadb
+    fragment: null
+    ip: 198.51.100.37
+    hostname: abcdefghijklm1234567890123.mariadb.service._.eu.{{< vendor/urlraw "hostname" >}}
+    public: false
+    cluster: abcdefgh1234567-main-abcd123
+    host: mariadb.internal
+    rel: mysql
+    query:
+      is_master: true
+    path: main
+    password: ''
+    type: 'mariadb:10.6'
+    port: 3306
+    host_mapped: false
+    url: 'mysql://user:@mariadb.internal:3306/main'
 ```
 
-With this example, you can connect to the `database` relationship
+With this example, you can connect to the `mariadb` relationship
 with the user `user`, an empty password, and the database name `main` (from the `path`).
 The `url` property shows a full database connection that can be used from your app.
 
-{{% service-values-change %}}
+Note that the information about the relationship can change when an app is redeployed or restarted or the relationship is changed. So your apps should only rely on the `PLATFORM_RELATIONSHIPS` environment variable directly rather than hard coding any values.
 
 ### 2. Open an SSH tunnel
 
 Open a single [SSH tunnel](../development/ssh/_index.md#connect-to-services) by running the following CLI command:
 
 ```bash
-platform tunnel:single --relationship {{< variable "RELATIONSHIP_NAME" >}}
+{{% vendor/cli %}} tunnel:single --relationship {{< variable "RELATIONSHIP_NAME" >}}
 ```
 
 By default, this opens a tunnel at `127.0.0.1:30000`.
@@ -220,6 +321,16 @@ You can specify the port for the connection using the `--port` flag.
 
 You can then connect to this service in a separate terminal or locally running app.
 With the example above, you connect to a URL like the following:
-`mysql://user:@127.0.0.1:30000/main'`
+`mysql://user:@127.0.0.1:30000/main`
 
 {{< /codetabs >}}
+
+## Upgrading services
+
+{{% vendor/name %}} provides a large number of [managed service versions](#available-services).
+As new versions are made available, you will inevitably upgrade infrastructure to a more recent (or latest version).
+
+When you do so, we would recommend:
+
+1. **Use preview environments**. Leverage preview (non-production environments) to perform the upgrade, then merge the upgrade into production (promotion). This will give you an opportunity to test inherited production data in a safe, isolated environment first.
+1. **Upgrade progressively**. For one reason or another, you may be more than a single version behind the upgrade you are trying to perform. To avoid data loss issues caused by large differences in versions, [upgrade one version at a time](https://www.rabbitmq.com/upgrade.html#rabbitmq-version-upgradability).

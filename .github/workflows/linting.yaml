@@ -14,6 +14,9 @@ jobs:
       ) &&
       contains(github.event.pull_request.labels.*.name, vars.LBL_MRKDWNPROSE)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site: ['platform', 'upsun']
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -23,11 +26,11 @@ jobs:
       with:
         node-version: 16
         cache: 'npm'
-        cache-dependency-path: sites/platform/package-lock.json
+        cache-dependency-path: sites/${{ matrix.site }}/package-lock.json
 
     - name: Run lint markdown
       run: |
-        cd sites/platform
+        cd sites/${{ matrix.site }}
         npm ci
         npm run lint:markdown
 
@@ -40,15 +43,24 @@ jobs:
       ) &&
       contains(github.event.pull_request.labels.*.name, vars.LBL_MRKDWNPROSE)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site: ['platform', 'upsun']
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          # we need to checkout the PR repo/branch even if it's a fork because the action in the next step needs to
+          # check the markdown from the PR itself. Plus, we're only running this job if a PR from fork has been approved
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Vale
         uses: errata-ai/vale-action@reviewdog
         with:
+          version: 3.0.7
           fail_on_error: true
           reporter: github-check
-          files: sites/platform/src
+          files: sites/${{ matrix.site }}/src
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
