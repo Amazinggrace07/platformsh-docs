@@ -4,6 +4,11 @@ import json
 import meilisearch
 from platformshconfig import Config
 
+import sys
+
+docs_index_name = sys.argv[1]
+
+
 class Search:
     def __init__(self):
         self.default = {
@@ -14,9 +19,9 @@ class Search:
 
         self.scrape_dir = "output"
         self.scrape_config = "config/scrape.json"
-        self.docs_index = "docs"
+        self.docs_index = "{0}_docs".format(docs_index_name)
         self.primaryKey = "documentId"
-        self.index_name = "Docs"
+        self.index_name = "Docs ({0})".format(docs_index_name)
 
         # Below are Platform.sh custom settings for how the search engine functions.
 
@@ -98,7 +103,7 @@ class Search:
         """
         Cycle through the individual site indexes in /outputs so their individual documents can be added to Meilisearch.
         """
-        documents = [f for f in glob.glob("{}/*.json".format(self.scrape_dir))]
+        documents = [f for f in glob.glob("{0}/{1}_*.json".format(self.scrape_dir, docs_index_name))]
         for doc in documents:
             self.add(doc, index)
 
@@ -124,7 +129,15 @@ class Search:
         # Create a new index
         create_index_task = client.create_index(uid=self.docs_index, options={'primaryKey': self.primaryKey, 'uid': self.index_name})
 
-        client.wait_for_task(create_index_task['taskUid'])
+        timeout = 10000
+        if "friday" == docs_index_name:
+          timeout = 15000
+
+        try:
+          client.wait_for_task(create_index_task['taskUid'], timeout)
+        except meilisearch.errors.MeilisearchTimeoutError as merror:
+          print('Failed waiting {0} milliseconds for Meilisearch to create the index. Error message: {1}'.format(timeout, merror))
+          return
 
         index = client.get_index(create_index_task['indexUid'])
 
