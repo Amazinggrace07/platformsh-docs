@@ -1,3 +1,4 @@
+<!-- shortcode start {{ .Name }} -->
 <div x-show="stack === 'php'">
 
 <ul class="{{ partial "codetabs/tab-control-list-styles" }}">
@@ -23,7 +24,7 @@
 
 <div role="tabpanel" x-show="frametech === 'default'" :aria-hidden="frametech === 'default'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -33,7 +34,7 @@ type: 'php:8.0'
 # Indicate to use Composer 2 (leave out if you want Composer 1)
 # See how without Composer: https://docs.platform.sh/guides/wordpress/vanilla.html
 dependencies:
-    php: 
+    php:
         composer/composer: '^2'
 
 # The size of the persistent disk of the application (in MB)
@@ -53,7 +54,7 @@ web:
 
 <div role="tabpanel" x-show="frametech === 'socket'" :aria-hidden="frametech === 'socket'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -63,7 +64,7 @@ type: 'php:8.0'
 # Indicate to use Composer 2 (leave out if you want Composer 1)
 # See how without Composer: https://docs.platform.sh/guides/wordpress/vanilla.html
 dependencies:
-    php: 
+    php:
         composer/composer: '^2'
 
 # The size of the persistent disk of the application (in MB)
@@ -75,7 +76,7 @@ web:
     upstream:
         socket_family: tcp
         protocol: http
-    
+
     # Set the specific command to start your app
     # using the provided port
     commands:
@@ -126,7 +127,7 @@ web:
 
 <div role="tabpanel" x-show="frametech === 'default'" :aria-hidden="frametech === 'default'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -148,7 +149,7 @@ You may need to adapt the start command to fit your app.
 
 <div role="tabpanel" x-show="frametech === 'pipenv'" :aria-hidden="frametech === 'pipenv'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -185,7 +186,7 @@ web:
 
 <div role="tabpanel" x-show="frametech === 'poetry'" :aria-hidden="frametech === 'poetry'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -257,7 +258,7 @@ web:
 
 <div role="tabpanel" x-show="frametech === 'default'" :aria-hidden="frametech === 'default'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -276,7 +277,7 @@ web:
 
 <div role="tabpanel" x-show="frametech === 'yarn3'" :aria-hidden="frametech === 'yarn3'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -300,7 +301,7 @@ web:
 
 <div role="tabpanel" x-show="frametech === 'yarnOld'" :aria-hidden="frametech === 'yarnOld'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -333,7 +334,7 @@ You may need to adapt the start command to fit your app.
 
 <div x-show="stack === 'golang'">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -378,7 +379,7 @@ You may need to adapt the start command to fit your app.
 
 <div role="tabpanel" x-show="frametech === 'default'" :aria-hidden="frametech === 'default'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -397,7 +398,7 @@ web:
 
 <div role="tabpanel" x-show="frametech === 'gradle'" :aria-hidden="frametech === 'gradle'" class="{{ partial "codetabs/tab-styles" }} {{ partial "codetabs/tab-children-styles" }}">
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 # The name of the app. Must be unique within a project.
 name: app
 
@@ -417,3 +418,4 @@ web:
 
 You may need to adapt the start command to fit your app.
 </div>
+<!-- shortcode end {{ .Name }} -->

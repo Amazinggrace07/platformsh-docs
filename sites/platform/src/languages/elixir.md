@@ -1,23 +1,50 @@
 ---
 title: "Elixir"
-description: "{{< vendor/name >}} supports building and deploying applications written in Elixir. There is no default flavor for the build phase, but you can define it explicitly in your build hook. {{< vendor/name >}} Elixir images support both committed dependencies and download-on-demand. The underlying Erlang version is 22.0.7."
+description: "{{% vendor/name %}} supports building and deploying applications written in Elixir. There is no default flavor for the build phase, but you can define it explicitly in your build hook. {{% vendor/name %}} Elixir images support both committed dependencies and download-on-demand. The underlying Erlang version is 22.0.7."
 ---
+
+{{% composable/disclaimer %}}
 
 {{% description %}}
 
 ## Supported versions
 
-{{% major-minor-versions-note configMinor="true" %}}
+You can select the major and minor version.
 
-| Grid and {{% names/dedicated-gen-3 %}} | {{% names/dedicated-gen-2 %}} |
-|----------------------------------------|------------------------------ |
-| {{< image-versions image="elixir" status="supported" environment="grid" >}} | {{< image-versions image="elixir" status="supported" environment="dedicated-gen-2" >}} |
+Patch versions are applied periodically for bug fixes and the like. When you deploy your app, you always get the latest available patches.
+
+<table>
+    <thead>
+        <tr>
+            <th>Grid and {{% names/dedicated-gen-3 %}}</th>
+            <th>Dedicated Gen 2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{< image-versions image="elixir" status="supported" environment="grid" >}}</td>
+            <td>{{< image-versions image="elixir" status="supported" environment="dedicated-gen-2" >}}</thd>
+        </tr>
+    </tbody>
+</table>
 
 {{% language-specification type="elixir" display_name="Elixir" %}}
 
+```yaml {configFile="apps"}
+myapp:
+  type: 'elixir:<VERSION_NUMBER>'
+```
+
+For example:
+
+```yaml {configFile="apps"}
+myapp:
+  type: 'elixir:{{% latest "elixir" %}}'
+```
+
 ## Built-in variables
 
-{{< vendor/name >}} exposes relationships and other configuration as [environment variables](../development/variables/_index.md).
+{{% vendor/name %}} exposes relationships and other configuration as [environment variables](../development/variables/_index.md).
 Most notably, it allows a program to determine at runtime what HTTP port it should listen on
 and what the credentials are to access [other services](../add-services/_index.md).
 
@@ -37,22 +64,26 @@ Remember `config/prod.exs` is evaluated at **build time** and has no access to r
 
 If you are using Hex to manage your dependencies, you need to specify the `MIX_ENV` environment variable:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 variables:
-    env:
-        MIX_ENV: 'prod'
+  env:
+    MIX_ENV: 'prod'
 ```
-
 The `SECRET_KEY_BASE` variable is generated automatically based on the [`PLATFORM_PROJECT_ENTROPY` variable](../development/variables/use-variables.md#use-provided-variables).
 You can change it.
 
 Include in your build hook the steps to retrieve a local Hex and `rebar`, and then run `mix do deps.get, deps.compile, compile` on your application to build a binary.
 
-{{< readFile file="registry/images/examples/full/elixir.hooks.app.yaml" highlight="yaml" location=".platform.app.yaml" >}}
-
+```yaml {configFile="app"}
+hooks:
+  build: |
+    mix local.hex --force
+    mix local.rebar --force
+    mix do deps.get --only prod, deps.compile, compile
+```
 {{< note >}}
 
-That build hook works for most cases and assumes that your `mix.exs` file is located at [your app root](../create-apps/app-reference.md#root-directory).
+That build hook works for most cases and assumes that your `mix.exs` file is located at [your app root](/create-apps/app-reference/single-runtime-image.md#root-directory).
 
 {{< /note >}}
 
@@ -61,35 +92,34 @@ you can then start it from the `web.commands.start` directive.
 
 The following basic app configuration is sufficient to run most Elixir applications.
 
-```yaml {location=".platform.app.yaml"}
-name: app
+```yaml {configFile="app"}
+name: myapp
 
-type: elixir:1.13
+type: 'elixir:{{% latest "elixir" %}}'
 
 variables:
-    env:
-        MIX_ENV: 'prod'
+  env:
+    MIX_ENV: 'prod'
 
 hooks:
-    build: |
-        mix local.hex --force
-        mix local.rebar --force
-        mix do deps.get --only prod, deps.compile, compile
+  build: |
+    mix local.hex --force
+    mix local.rebar --force
+    mix do deps.get --only prod, deps.compile, compile
 
 web:
-    commands:
-        start: mix phx.server
-    locations:
-        /:
-            allow: false
-            passthru: true
+  commands:
+    start: mix phx.server
+  locations:
+    /:
+      allow: false
+      passthru: true
 ```
-
 Note that there is still an Nginx proxy server sitting in front of your application. If desired, certain paths may be served directly by Nginx without hitting your application (for static files, primarily) or you may route all requests to the Elixir application unconditionally, as in the example above.
 
 ## Dependencies
 
-The recommended way to handle Elixir dependencies on {{< vendor/name >}} is using Hex.
+The recommended way to handle Elixir dependencies on {{% vendor/name %}} is using Hex.
 You can commit a `mix.exs` file in your repository and the system downloads the dependencies in your `deps` section using the build hook above.
 
 ```elixir
@@ -104,7 +134,7 @@ You can commit a `mix.exs` file in your repository and the system downloads the 
 
 {{% guides/config-reader-info lang="elixir" %}}
 
-If you are building a Phoenix app for example, it would suffice to add a database to `.platform/services.yaml` and a relationship in `.platform.app.yaml`. Put the lib in your `deps` and, assuming you renamed the `prod.secret.exs` to `releases.exs` per the [Phoenix guide](https://hexdocs.pm/phoenix/releases.html), change:
+If you are building a Phoenix app for example, it would suffice to add a database to `{{< vendor/configfile "services" >}}` and a relationship in `{{< vendor/configfile "app" >}}`. Put the lib in your `deps` and, assuming you renamed the `prod.secret.exs` to `releases.exs` per the [Phoenix guide](https://hexdocs.pm/phoenix/releases.html), change:
 
 ```elixir
 System.get_env("DATABASE_URL")
@@ -118,13 +148,21 @@ Platformsh.Config.ecto_dsn_formatter("database")
 
 See [Config Reader Documentation](../development/variables/use-variables.md#access-variables-in-your-app) for the full API.
 
+
 ### Accessing Services Manually
 
 The services configuration is available in the environment variable `PLATFORM_RELATIONSHIPS`.
 
-Given a relationship defined in `.platform.app.yaml`:
+Given a [relationship](/create-apps/app-reference/single-runtime-image#relationships) defined in `{{< vendor/configfile "app" >}}`:
 
-{{< readFile file="registry/images/examples/full/postgresql.app.yaml" highlight="yaml" location=".platform.app.yaml" >}}
+```yaml {configFile="app"}
+# Relationships enable an app container's access to a service.
+# The example below shows simplified configuration leveraging a default service
+# (identified from the relationship name) and a default endpoint.
+# See the Application reference for all options for defining relationships and endpoints.
+relationships:
+  postgresql:
+```
 
 Assuming you have in `mix.exs` the Poison library to parse JSON:
 
@@ -140,7 +178,7 @@ And assuming you use `ecto` you could put in `config/config.exs`:
 
 ```elixir
 relationships = Poison.decode!(Base.decode64!(System.get_env("PLATFORM_RELATIONSHIPS")))
-[postgresql_config | _tail] = relationships["postgresdatabase"]
+[postgresql_config | _tail] = relationships["postgresql"]
 
 config :my_app, Repo,
   database: postgresql_config["path"],
@@ -151,9 +189,10 @@ config :my_app, Repo,
 
 and setup Ecto during the deploy hook:
 
-```yaml
-deploy: |
+```yaml {configFile="app"}
+hooks:
+  deploy: |
     mix do ecto.setup
 ```
 
-{{% config-reader %}}[Elixir configuration reader library](https://github.com/platformsh/config-reader-elixir/){{% /config-reader %}}
+{{% config-reader %}}[ Elixir configuration reader library](https://github.com/platformsh/config-reader-elixir/){{% /config-reader %}}

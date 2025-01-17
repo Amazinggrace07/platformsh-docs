@@ -11,7 +11,10 @@
   {{ else if gt ( len $title ) 60 }}
     {{ $title = truncate 60 "" $title }}
   {{ end }}
-  <title>{{ $title }}</title>
+  {{ if .Page.IsHome }}
+    {{ $title = .Site.Title }}
+  {{ end }}
+  <title>{{ $title | htmlUnescape }}</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   {{ if isset .Site.Params "favicon" }}
@@ -23,5 +26,9 @@
   {{ partial "head/opengraph" . }}
   {{ partial "head/css" . }}
   {{ partial "scripts/global" . }}
+
+  {{ if .Param "math" }}
+    {{ partialCached "head/math.html" . }}
+  {{ end }}
 
 </head>

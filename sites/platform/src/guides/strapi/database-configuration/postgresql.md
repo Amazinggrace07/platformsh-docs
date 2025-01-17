@@ -1,33 +1,33 @@
 ---
-title: "Configure PostgreSQL for Strapi on {{< vendor/name >}}"
+title: "Configure PostgreSQL for Strapi on {{% vendor/name %}}"
 sidebarTitle: "PostgreSQL"
 weight: -90
 description: |
-  Configure your Strapi application to use a PostgreSQL database on {{< vendor/name >}}.
+  Configure your Strapi application to use a PostgreSQL database on {{% vendor/name %}}.
 ---
 
 Strapi can be configured to use PostgreSQL as its default database.
 You can choose PostgreSQL when installing your app by selecting custom and PostgreSQL when asked for the installation type
 or you can just configure your existing Strapi application to use PostgreSQL.
-To configure a PostgreSQL database for Strapi on {{< vendor/name >}}, follow these steps.
+To configure a PostgreSQL database for Strapi on {{% vendor/name %}}, follow these steps.
 
 1. Install [PostgreSQL](https://www.postgresql.org/download/) on your machine
    and [pg](https://www.npmjs.com/package/pg) in your Strapi project.
    Pg comes installed with a fresh Strapi installation.
 
-1. In your `services.yaml` file, add the following:
+1. In your `{{< vendor/configfile "services" >}}` file, add the following:
 
-   ```yaml
+   ```yaml {configFile="services"}
    	postgres:
-   	     type: postgresql:13
-            disk: 512
+      type: postgresql:13
+        disk: 512
    ```
 
-1. In your `.platform.app.yaml` file, replace the relationship name to match the PostgreSQL database you added:
+1. In your `{{< vendor/configfile "app" >}}` file, replace the relationship name to match the PostgreSQL database you added:
 
-   ```yaml
+   ```yaml {configFile="app"}
    relationships:
-      postgresdatabase: "postgres:postgresql"
+     postgresdatabase: "postgres:postgresql"
    ```
 
 1. In the `config` folder, locate the `database.js` file, and replace its content with the following:
@@ -54,10 +54,10 @@ To configure a PostgreSQL database for Strapi on {{< vendor/name >}}, follow the
    };
 
    if (config.isValidPlatform() && !config.inBuild()) {
-     // {{< vendor/name >}} database configuration.
+     // {{% vendor/name %}} database configuration.
      const credentials = config.credentials(dbRelationship);
      console.log(
-       `Using {{< vendor/name >}} configuration with relationship ${dbRelationship}.`
+       `Using {{% vendor/name %}} configuration with relationship ${dbRelationship}.`
      );
 
      let pool = {
@@ -89,12 +89,12 @@ To configure a PostgreSQL database for Strapi on {{< vendor/name >}}, follow the
      if (config.isValidPlatform()) {
        // Build hook configuration message.
        console.log(
-         "Using default configuration during {{< vendor/name >}} build hook until relationships are available."
+         "Using default configuration during {{% vendor/name %}} build hook until relationships are available."
        );
      } else {
        // Strapi default local configuration.
        console.log(
-         "Not in a {{< vendor/name >}} Environment. Using default local sqlite configuration."
+         "Not in a {{% vendor/name %}} Environment. Using default local sqlite configuration."
        );
      }
    }
@@ -106,5 +106,5 @@ To configure a PostgreSQL database for Strapi on {{< vendor/name >}}, follow the
    ```
 
 This setting deploys your Strapi application with a PostgreSQL database.
-If you don't specify a PostgreSQL service in your `services.yaml` file or the Strapi application is run on a local machine
+If you don't specify a PostgreSQL service in your `{{< vendor/configfile "services" >}}` file or the Strapi application is run on a local machine
 the default SQLite database is used.

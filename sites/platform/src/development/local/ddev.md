@@ -5,12 +5,13 @@ description: Use DDEV to set up local development environments.
 weight: 1
 sectionBefore: Integrated environments
 keywords:
-    - ddev 
+    - ddev
 ---
 
 {{% ddev/definition %}}
 
 This guide assumes you have a project already running with {{< vendor/name >}} and you have the code on your computer.
+
 If you're starting from scratch, first [create a project from a PHP template]({{% create-project-link template=true %}}).
 
 ## Before you begin
@@ -46,7 +47,7 @@ so the correct files are added.
 To get your environment data (files, database), run the following command:
 
 ```bash
-ddev pull platform
+ddev pull {{% vendor/cli %}}
 ```
 
 To skip pulling files, add `--skip-files` to the command.
@@ -60,7 +61,7 @@ Now your project is ready to run:
 ddev start
 ```
 
-This runs all your hooks and builds your project like on {{< vendor/name >}}.
+This runs all your hooks and builds your project like on {{% vendor/name %}}.
 
 The command returns the project URL `http://{{< variable "PROJECT_NAME" >}}.ddev.site/`
 as well as a specific port on `http://127.0.0.1`.
@@ -79,7 +80,7 @@ add them to the project's DDEV environment:
 
 ```yaml {location=".ddev/config.yaml"}
 web_environment:
-    - {{< variable "VARIABLE_NAME" >}}: {{< variable "VALUE" >}}
+  - {{< variable "VARIABLE_NAME" >}}: {{< variable "VALUE" >}}
 ```
 
 To apply your changes, run the following command:

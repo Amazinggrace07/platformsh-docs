@@ -1,23 +1,24 @@
 ---
 title: "Work with workers"
 description: Interact with your worker instances to handle background tasks for your apps.
+weight: 15
 ---
 
 Workers are instances of your code that aren't open to connections from other apps or services or the outside world.
 They're good for handling background tasks.
-See how to [configure a worker](./app-reference.md#workers) for your app.
+See how to [configure a worker](/create-apps/app-reference/single-runtime-image.md#workers) for your app.
 
 Note that to have enough resources to support a worker and a service, you need at least a [{{< partial "plans/multiapp-plan-name" >}} plan](../administration/pricing/_index.md#multiple-apps-in-a-single-project).
 
 ## Access the worker container
 
 Like with any other application container,
-{{< vendor/name >}} allows you to connect to the worker instance through SSH to inspect logs and interact with it.
+{{% vendor/name %}} allows you to connect to the worker instance through SSH to inspect logs and interact with it.
 
-Use the `--worker` switch in the {{< vendor/name >}} CLI, like so:
+Use the `--worker` switch in the {{% vendor/name %}} CLI, like so:
 
 ```bash
-platform ssh --worker=queue
+{{% vendor/cli %}} ssh --worker=queue
 ```
 
 ## Stopping a worker
@@ -72,74 +73,67 @@ The `start` key specifies the command to use to launch your worker application.
 It may be any valid shell command, although most often it runs a command in your application in the language of your application.
 If the command specified by the `start` key terminates, it's restarted automatically.
 
-Note that [`deploy` and `post_deploy` hooks](./hooks/_index.md) as well as [`cron` commands](./app-reference.md#crons)
-run only on the [`web`](./app-reference.md#web) container, not on workers.
+Note that [`deploy` and `post_deploy` hooks](./hooks/_index.md) as well as [`cron` commands](/create-apps/app-reference/single-runtime-image.md#crons)
+run only on the [`web`](/create-apps/app-reference/single-runtime-image.md#web) container, not on workers.
 
 ## Inheritance
 
-Any top-level definitions for [`size`](./app-reference.md#sizes), [`relationships`](./app-reference.md#relationships),
-[`access`](./app-reference.md#access), [`disk`](./app-reference.md), [`mount`](./app-reference.md#mounts), and [`variables`](./app-reference.md#variables)
+Any top-level definitions for [`size`](/create-apps/app-reference/single-runtime-image.md#sizes), [`relationships`](/create-apps/app-reference/single-runtime-image.md#relationships),
+[`access`](/create-apps/app-reference/single-runtime-image.md#access), [`disk`](/create-apps/app-reference/single-runtime-image.md), [`mount`](/create-apps/app-reference/single-runtime-image.md#mounts), and [`variables`](/create-apps/app-reference/single-runtime-image.md#variables)
 are inherited by every worker, unless overridden explicitly.
 
-That means, for example, that the following two `.platform.app.yaml` definitions produce identical workers.
+That means, for example, that the following two `{{< vendor/configfile "app" >}}` definitions produce identical workers.
 
-```yaml
-name: app
-
-type: python:3.5
-
+```yaml {configFile="app"}
+name: myapp
+type: python:{{% latest "python" %}}
 disk: 256
 mounts:
-    test:
+  test:
+    source: local
+    source_path: test
+relationships:
+  mysql:
+workers:
+  queue:
+    commands:
+      start: |
+        python queue-worker.py
+  mail:
+    commands:
+      start: |
+        python mail-worker.py
+```
+```yaml {configFile="app"}
+name: myapp
+type: python:{{% latest "python" %}}
+workers:
+  queue:
+    commands:
+      start: |
+        python queue-worker.py
+    disk: 256
+    mounts:
+      test:
         source: local
         source_path: test
-
-relationships:
-    database: 'mysqldb:mysql'
-
-workers:
-    queue:
-        commands:
-            start: |
-                python queue-worker.py
-    mail:
-        commands:
-            start: |
-                python mail-worker.py
-```
-
-```yaml
-name: app
-
-type: python:3.5
-
-workers:
-    queue:
-        commands:
-            start: |
-                python queue-worker.py
-        disk: 256
-        mounts:
-            test:
-                source: local
-                source_path: test
-        relationships:
-            database: 'mysqldb:mysql'
-    mail:
-        commands:
-            start: |
-                python mail-worker.py
-        disk: 256
-        mounts:
-            test:
-                source: local
-                source_path: test
-        relationships:
-            database: 'mysqldb:mysql'
+    relationships:
+      mysql:
+  mail:
+    commands:
+      start: |
+        python mail-worker.py
+    disk: 256
+    mounts:
+      test:
+        source: local
+        source_path: test
+    relationships:
+      mysql:
 ```
 
 In both cases, there are two worker instances named `queue` and `mail`.
-Both have access to a MySQL/MariaDB service defined in `services.yaml` named `mysqldb` through the `database` relationship.
+Both have access to a MySQL/MariaDB service defined in `{{< vendor/configfile "services" >}}` named `mysqldb` through the `database` relationship.
 Both also have their own separate, independent local disk mount at `/app/test` with 256 MB of allowed space.
 
 ## Customizing a worker
@@ -151,117 +145,105 @@ while `variables` lets you instruct the application to run differently as a work
 
 For example, consider the following configuration:
 
-```yaml {location=".platform/services.yaml"}
-db:
-  type: "mariadb:10.4"
+```yaml {configFile="services"}
+mysql:
+  type: "mariadb:{{% latest "mariadb" %}}"
   disk: 2048
-
-rabbitqueue:
-    type: rabbitmq:3.11
-    disk: 512
+rabbitmq:
+  type: rabbitmq:{{% latest "rabbitmq" %}}
+  disk: 512
 ```
-
-```yaml {location=".platform.app.yaml"}
-name: app
-
-type: "python:3.7"
-
+```yaml {configFile="app"}
+name: myapp
+type: "python:{{% latest "python" %}}"
 disk: 2048
-
 hooks:
-    build: |
-       pip install -r requirements.txt
-       pip install -e .
-       pip install gunicorn
-
+  build: |
+    pip install -r requirements.txt
+    pip install -e .
+    pip install gunicorn
 relationships:
-    database: 'mysqldb:mysql'
-    messages: 'rabbitqueue:rabbitmq'
-
+  mysql:
+  rabbitmq:
 variables:
-    env:
-        type: 'none'
-
+  env:
+    type: 'none'
 web:
-    commands:
-        start: "gunicorn -b $PORT project.wsgi:application"
-    variables:
-        env:
-            type: 'web'
-    mounts:
-        uploads:
-            source: local
-            source_path: uploads
-    locations:
-         "/":
-             root: ""
-             passthru: true
-             allow: false
-         "/static":
-             root: "static/"
-             allow: true
-
+  commands:
+    start: "gunicorn -b $PORT project.wsgi:application"
+  variables:
+    env:
+      type: 'web'
+  mounts:
+    uploads:
+      source: local
+      source_path: uploads
+  locations:
+    "/":
+      root: ""
+      passthru: true
+      allow: false
+    "/static":
+      root: "static/"
+      allow: true
 workers:
-    queue:
-        size: 'M'
-        commands:
-            start: |
-                python queue-worker.py
-        variables:
-            env:
-                type: 'worker'
-        disk: 512
-        mounts:
-            scratch:
-                source: local
-                source_path: scratch
-
-
-
-    mail:
-        size: 'S'
-        commands:
-            start: |
-                python mail-worker.py
-        variables:
-            env:
-                type: 'worker'
-        disk: 256
-        mounts: {}
-        relationships:
-            emails: 'rabbitqueue:rabbitmq'
+  queue:
+    size: 'M'
+    commands:
+      start: |
+        python queue-worker.py
+    variables:
+      env:
+        type: 'worker'
+    disk: 512
+    mounts:
+      scratch:
+        source: local
+        source_path: scratch
+  mail:
+    size: 'S'
+    commands:
+      start: |
+        python mail-worker.py
+    variables:
+      env:
+        type: 'worker'
+    disk: 256
+    mounts: {}
+    relationships:
+      rabbitmq:
 ```
 
 There's a lot going on here, but it's all reasonably straightforward.
-The configuration in `.platform.app.yaml` takes a single Python 3.7 code base from your repository,
+The configuration in `{{< vendor/configfile "app" >}}` takes a single Python {{% latest "python" %}} code base from your repository,
 downloads all dependencies in `requirements.txt`, and then installs Gunicorn.
-That artifact (your code plus the downloaded dependencies) is deployed as three separate container instances, all running Python 3.7.
+That artifact (your code plus the downloaded dependencies) is deployed as three separate container instances, all running Python {{% latest "python" %}}.
 
 The `web` instance starts a Gunicorn process to serve a web application.
 
-* It runs the Gunicorn process to serve web requests, defined by the `project/wsgi.py` file which contains an `application` definition.
-* It has an environment variable named `TYPE` with value `web`.
-* It has a writable mount at `/app/uploads` with a maximum space of 2048 MB.
-* It has access to both a MySQL database and a RabbitMQ server, both of which are defined in `services.yaml`.
-* {{< vendor/name >}} automatically allocates resources to it as available on the plan, once all fixed-size containers are allocated.
+- It runs the Gunicorn process to serve web requests, defined by the `project/wsgi.py` file which contains an `application` definition.
+- It has an environment variable named `TYPE` with value `web`.
+- It has a writable mount at `/app/uploads` with a maximum space of 2048 MB.
+- It has access to both a MySQL database and a RabbitMQ server, both of which are defined in `{{< vendor/configfile "services" >}}`.
+- {{% vendor/name %}} automatically allocates resources to it as available on the plan, once all fixed-size containers are allocated.
 
 The `queue` instance is a worker that isn't web-accessible.
 
-* It runs the `queue-worker.py` script, and restart it automatically if it ever terminates.
-* It has an environment variable named `TYPE` with value `worker`.
-* It has a writable mount at `/app/scratch` with a maximum space of 512 MB.
-* It has access to both a MySQL database and a RabbitMQ server,
-  both of which are defined in `services.yaml` (because it doesn't specify otherwise).
-* It has "Medium" levels of CPU and RAM allocated to it, always.
+- It runs the `queue-worker.py` script, and restart it automatically if it ever terminates.
+- It has an environment variable named `TYPE` with value `worker`.
+- It has a writable mount at `/app/scratch` with a maximum space of 512 MB.
+- It has access to both a MySQL database and a RabbitMQ server,
+  both of which are defined in `{{< vendor/configfile "services" >}}` (because it doesn't specify otherwise).
+- It has "Medium" levels of CPU and RAM allocated to it, always.
 
 The `mail` instance is a worker that isn't web-accessible.
 
-* It runs the `mail-worker.py` script, and restart it automatically if it ever terminates.
-* It has an environment variable named `TYPE` with value `worker`.
-* It has no writable file mounts at all.
-* It has access only to the RabbitMQ server, through a different relationship name than on the `web` instance.
+- It runs the `mail-worker.py` script, and restart it automatically if it ever terminates.
+- It has an environment variable named `TYPE` with value `worker`.
+- It has no writable file mounts at all.
+- It has access only to the RabbitMQ server, through a different relationship name than on the `web` instance.
   It has no access to MySQL.
-* It has "Small" levels of CPU and RAM allocated to it, always.
+- It has "Small" levels of CPU and RAM allocated to it, always.
 
 This way, the web instance has a large upload space, the queue instance has a small amount of scratch space for temporary files,
 and the mail instance has no persistent writable disk space at all as it doesn't need it.

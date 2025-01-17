@@ -1,11 +1,11 @@
 ---
-title: "Symfony Integration"
+title: "Symfony integration"
 weight: -130
 description: |
-    Learn how to use the Symfony integration for a better {{< vendor/name >}} experience.
+    Learn how to use the Symfony integration for a better {{% vendor/name %}} experience.
 ---
 
-Symfony has a special integration with {{< vendor/name >}} that makes it easier to use {{< vendor/name >}} for Symfony projects.
+Symfony has a special integration with {{% vendor/name %}} that makes it easier to use {{% vendor/name %}} for Symfony projects.
 
 **When using the Symfony integration, you are contributing financially to the Symfony project.**
 
@@ -14,19 +14,19 @@ The Symfony integration is automatically enabled when:
 - You run the `symfony new` command with the `--cloud` option;
 
 - You run `symfony project:init` on an existing project to automatically
-  generate the {{< vendor/name >}} configuration.
+  generate the {{% vendor/name %}} configuration.
 
-If you already have a {{< vendor/name >}} configuration without the Symfony
+If you already have a {{% vendor/name %}} configuration without the Symfony
 integration, enable it by adding the following configuration:
 
-   ```yaml {location=".platform.app.yaml"}
+   ```yaml {configFile="app"}
     hooks:
-        build: |
-            set -x -e
+      build: |
+        set -x -e
 
-            curl -fs https://get.symfony.com/cloud/configurator | bash
+        curl -fs https://get.symfony.com/cloud/configurator | bash
 
-            # ...
+        # ...
    ```
 
 The **configurator** enables the following integration:
@@ -45,7 +45,7 @@ services](./environment-variables#service-environment-variables).
 
 ## Tools
 
-The **configurator** (`curl -fs https://get.symfony.com/cloud/configurator | bash`) is a script specially crafted for {{< vendor/name >}}.
+The **configurator** (`curl -fs https://get.symfony.com/cloud/configurator | bash`) is a script specially crafted for {{% vendor/name %}}.
 It ensures that projects are always using the latest version of the following tools:
 
 - [croncape](./crons#use-croncape) for cron feedback
@@ -54,7 +54,7 @@ It ensures that projects are always using the latest version of the following to
 
 ## Hooks
 
-The `hooks` section defines the scripts that {{< vendor/name >}} runs at specific times of an application lifecycle:
+The `hooks` section defines the scripts that {{% vendor/name %}} runs at specific times of an application lifecycle:
 
 - The [build hook](../../create-apps/hooks/hooks-comparison.md#build-hook) is run during the build process
 - The [deploy hook](../../create-apps/hooks/hooks-comparison.md#deploy-hook) is run during the deployment process
@@ -63,19 +63,19 @@ The `hooks` section defines the scripts that {{< vendor/name >}} runs at specifi
 
 Here's the default `hooks` section optimized for Symfony projects:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
-    build: |
-        set -x -e
+  build: |
+    set -x -e
 
-        curl -s https://get.symfony.com/cloud/configurator | bash
+    curl -s https://get.symfony.com/cloud/configurator | bash
 
-        symfony-build
+    symfony-build
 
-    deploy: |
-        set -x -e
+  deploy: |
+    set -x -e
 
-        symfony-deploy
+    symfony-deploy
 ```
 
 {{< note title="Warning" >}}
@@ -88,27 +88,27 @@ To have your hooks fail on the first failed command, start your scripts with `se
 For more information, see [Hooks](../../../create-apps/hooks/hooks-comparison).
 
 To gain a better understanding of how hooks relate to each other when building and deploying an app,
-see the [{{< vendor/name >}} philosophy](../../overview/philosophy.md).
+see the [{{% vendor/name %}} philosophy](/learn/overview/philosophy.md).
 
 {{< note title="Tip">}}
 
 During the `deploy` or `post_deploy` hooks, you can execute actions for a specific environment type only.
-To do so, in your `.platform.app.yaml`file,
+To do so, in your `{{< vendor/configfile "app" >}}`file,
 use the `PLATFORM_ENVIRONMENT_TYPE` [environment variable](../../development/variables/_index.md)) in a condition:
 
-```yaml
+```yaml {configFile="app"}
 hooks:
-    deploy: |
-        if [ "PLATFORM_ENVIRONMENT_TYPE" != "production" ]; then
-            symfony console app:dev:anonymize
-        fi
+  deploy: |
+    if [ "PLATFORM_ENVIRONMENT_TYPE" != "production" ]; then
+      symfony console app:dev:anonymize
+    fi
 ```
 
 {{< /note >}}
 
 ### symfony-build
 
-**symfony-build** is the script that builds a Symfony app in an optimized way for {{< vendor/name >}}.
+**symfony-build** is the script that builds a Symfony app in an optimized way for {{% vendor/name %}}.
 Use it as the main build script in your `build` hook.
 
 **symfony-build** performs the following actions:
@@ -123,14 +123,14 @@ Use it as the main build script in your `build` hook.
 
 To override the flags used by Composer, use the `$COMPOSER_FLAGS` environment variable:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
-    build: |
-        set -x -e
+  build: |
+    set -x -e
 
-        curl -s https://get.symfony.com/cloud/configurator | bash
+    curl -s https://get.symfony.com/cloud/configurator | bash
 
-        COMPOSER_FLAGS="--ignore-platform-reqs" symfony-build
+    COMPOSER_FLAGS="--ignore-platform-reqs" symfony-build
 ```
 
 When installing dependencies, the script automatically detects if the app is using npm or Yarn.
@@ -141,7 +141,7 @@ set `NO_NPM` or `NO_YARN` to `1` depending on your package manager.
 To customize Node/npm/Yarn behaviors,
 prefix the `symfony-build` script with the following environment variables:
 
-- ``NODE_VERSION``:  to pinpoint the Node version that nvm is going to install. 
+- ``NODE_VERSION``:  to pinpoint the Node version that nvm is going to install.
   The default value is ``--lts``.
 - ``YARN_FLAGS``: flags to pass to ``yarn install``.
   There is no default value.
@@ -159,9 +159,9 @@ It only works if you're using the [`symfony-build` script](#symfony-build) in yo
 ### php-ext-install
 
 You can use the **php-ext-install** script to compile and install PHP extensions
-not provided out of the box by {{< vendor/name >}},
+not provided out of the box by {{% vendor/name %}},
 or when you need a specific version of an extension.
-The script is written specifically for {{< vendor/name >}} to ensure fast and reliable setup during the build step.
+The script is written specifically for {{% vendor/name %}} to ensure fast and reliable setup during the build step.
 
 **php-ext-install** currently supports three ways of fetching sources:
 
@@ -172,25 +172,25 @@ The script is written specifically for {{< vendor/name >}} to ensure fast and re
 To ensure your app can be built properly, run ``php-ext-install`` after the [configurator](#tools)
 but before [symfony-build](#symfony-build):
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
-    build: |
-        set -x -e
+  build: |
+    set -x -e
 
-        curl -s https://get.symfony.com/cloud/configurator | bash
+    curl -s https://get.symfony.com/cloud/configurator | bash
 
-        php-ext-install redis 5.3.2
+    php-ext-install redis 5.3.2
 
-        symfony-build
+    symfony-build
 ```
 
 When installing [PECL](https://pecl.php.net/) PHP extensions, you can configure
 them directly as *variables* instead:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 variables:
-    php-ext:
-        redis: 5.3.2
+  php-ext:
+    redis: 5.3.2
 ```
 
 {{< note >}}
@@ -205,44 +205,46 @@ Changing the source of downloads or the version invalidates this cache.
 If you need to use the Node installation setup by [symfony-build](#symfony-build),
 use the following configuration:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
-    build: |
-        set -x -e
+  build: |
+    set -x -e
 
-        curl -s https://get.symfony.com/cloud/configurator | bash
+    curl -s https://get.symfony.com/cloud/configurator | bash
 
-        symfony-build
+    symfony-build
 
-        # Setup everything to use the Node installation
-        unset NPM_CONFIG_PREFIX
-        export NVM_DIR=${SYMFONY_APP_DIR}/.nvm
-        set +x && . "${NVM_DIR}/nvm.sh" use --lts && set -x
-        # Starting from here, everything is setup to use the same Node
-        yarn encore dev
+    # Setup everything to use the Node installation
+    unset NPM_CONFIG_PREFIX
+    export NVM_DIR=${PLATFORM_APP_DIR}/.nvm
+    set +x && . "${NVM_DIR}/nvm.sh" use --lts && set -x
+    # Starting from here, everything is setup to use the same Node
+    yarn encore dev
 ```
 
 If you want to use two different Node versions,
 use the following configuration instead:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 hooks:
-    build: |
-        set -x -e
+  build: |
+    set -x -e
 
-        curl -s https://get.symfony.com/cloud/configurator | bash
+    curl -s https://get.symfony.com/cloud/configurator | bash
 
-        symfony-build
+    symfony-build
 
-        cd web/js_app
-        unset NPM_CONFIG_PREFIX
-        export NVM_DIR=${SYMFONY_APP_DIR}/.nvm
+    cd web/js_app
+    unset NPM_CONFIG_PREFIX
+    export NVM_DIR=${PLATFORM_APP_DIR}/.nvm
 
-        NODE_VERSION=8 yarn-install
+    NODE_VERSION=8 yarn-install
 
-        # Setup everything to use the Node installation
-        set +x && . "${NVM_DIR}/nvm.sh" use 8 && set -x
+    # Setup everything to use the Node installation
+    set +x && . "${NVM_DIR}/nvm.sh" use 8 && set -x
 
-        # Starting from here, everything is setup to use Node 8
-        yarn build --environment=prod
+    # Starting from here, everything is setup to use Node 8
+    yarn build --environment=prod
 ```
+
+{{< guide-buttons previous="Back" next="Environment variables" >}}

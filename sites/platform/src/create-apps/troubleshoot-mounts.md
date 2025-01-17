@@ -1,8 +1,9 @@
 ---
 title: "Troubleshoot mounts"
+weight: 11
 ---
 
-{{% troubleshoot %}}
+For more general information, see how to [troubleshoot development](/development/troubleshoot).
 
 ## Overlapping folders
 
@@ -41,49 +42,49 @@ You can then put the mount back in place.
 ## Mounted files not publicly accessible
 
 If you've set up mounts to handle files like user uploads, you want to make sure the files are accessible.
-Do so by managing their [location](./app-reference.md#locations)
+Do so by managing their [location](/create-apps/app-reference/single-runtime-image.md#locations).
 
 This example defines two mounts, one named `private` and one `upload`:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 mounts:
-    'private':
-        source: local
-        source_path: private
-    'uploads':
-        source: local
-        source_path: uploads
+  'private':
+    source: local
+    source_path: private
+  'uploads':
+    source: local
+    source_path: uploads
 ```
 
 With only this definition, their behavior is the same.
 To make `uploads` accessible, define a location with different rules as in the following example:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 web:
-    locations:
-        '/':
-            # Handle dynamic requests
-            root: 'public'
-            passthru: '/app.php'
-        # Allow uploaded files to be served, but don't run scripts.
-        '/uploads':
-            root: 'uploads'
-            expires: 300s
-            scripts: false
-            allow: true
+  locations:
+    '/':
+      # Handle dynamic requests
+      root: 'public'
+      passthru: '/app.php'
+    # Allow uploaded files to be served, but don't run scripts.
+    '/uploads':
+      root: 'uploads'
+      expires: 300s
+      scripts: false
+      allow: true
 ```
 
 ## Mounts starting with a dot ignored
 
-{{< vendor/name >}} ignores YAML keys that start with a dot.
+{{% vendor/name %}} ignores YAML keys that start with a dot.
 This causes a mount like `.myhiddenfolder` to be ignored.
 To mount a directory starting with a dot, put a `/` at the start of its definition:
 
-```yaml
+```yaml {configFile="app"}
 mounts:
-    '/.myhiddenfolder':
-        source: local
-        source_path: 'myhiddenfolder'
+  '/.myhiddenfolder':
+    source: local
+    source_path: 'myhiddenfolder'
 ```
 
 ## Disk space issues
@@ -91,7 +92,7 @@ mounts:
 If you are worried about how much disk your mounts are using, check the size with the following command:
 
 ```bash
-platform mount:size
+{{% vendor/cli %}} mount:size
 ```
 
 You see the total size and what's available for each directory:

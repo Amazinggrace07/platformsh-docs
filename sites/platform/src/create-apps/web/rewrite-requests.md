@@ -10,29 +10,29 @@ For example, you might want to make URLs seem semantic to users without having t
 
 In such a case, you might want requests to `/shoes/great-shoe/` to be served
 as if they were requests to `/?category=shoes&product=great-shoe`.
-If so, add a [rule](../app-reference.md#rules) similar to the following:
+If so, add a [rule](/create-apps/app-reference/single-runtime-image.md#rules) similar to the following:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 web:
-    locations:
-        '/':
-            ...
-            rules:
-                '^/(?<category>[^/]+)/(?<product>[^/]+)/$':
-                    passthru: '/?category=$category&product=$product'
+  locations:
+    '/':
+      ...
+      rules:
+        '^/(?<category>[^/]+)/(?<product>[^/]+)/$':
+          passthru: '/?category=$category&product=$product'
 ```
 
 Or you might organize your images by file type, but don't want to expose the organization externally.
 You could rewrite requests to do that behind the scenes:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 web:
-    locations:
-        '/':
-            ...
-            rules:
-              '^/img/(?<name>.*)\.(?<type>.*)$':
-                  passthru: '/$type/$name.$type'
+  locations:
+    '/':
+      ...
+      rules:
+        '^/img/(?<name>.*)\.(?<type>.*)$':
+          passthru: '/$type/$name.$type'
 ```
 
 Now a request to `/img/image.png` returns the file found at `/png/image.png`.

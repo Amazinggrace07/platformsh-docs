@@ -35,7 +35,7 @@ title=Using the CLI
 Run the following command:
 
 ```sh
-platform redeploy
+{{% vendor/cli %}} redeploy
 ```
 
 {{< /codetabs >}}
@@ -53,10 +53,23 @@ To rerun the `build` and `deploy` hooks, [manually trigger a build](#manually-tr
 
 {{< /note >}}
 
+{{< note theme="info" title="Is there a way to redeploy the production environment without knowing its name?" >}}
+
+It's often desirable that the production environment, like many other values, is not hardcoded into your external workflows and management scripts.
+You can use the CLI, along with the [environment type distinction](/glossary#environment-type) to identify a production environment (assuming there is only one) and redeploy it in a single line.
+
+To do so, run the following command:
+
+```bash
+{{% vendor/cli %}} redeploy -e $({{% vendor/cli %}} environment:list --type production --pipe)
+```
+
+{{< /note >}}
+
 ### Manually trigger builds
 
 To increase performance and keep applications the same across environments,
-{{< vendor/name >}} reuses built applications if its code and build time configuration (variables and such) remain the same.
+{{% vendor/name %}} reuses built applications if its code and build time configuration (variables and such) remain the same.
 
 There may be times where you want to force your application to be built again without changing its code,
 for example to test an issue in a build hook or when external dependencies change.
@@ -67,14 +80,14 @@ Assuming you want to do this for your `main` environment,
 first create a `REBUILD_DATE` environment variable:
 
 ```bash
-platform variable:create --environment main --level environment --prefix env --name REBUILD_DATE --value "$(date)" --visible-build true
+{{% vendor/cli %}} variable:create --environment main --level environment --prefix env --name REBUILD_DATE --value "$(date)" --visible-build true
 ```
 
 This triggers a build right away to propagate the variable.
 To force a rebuild at any time, update the variable with a new value:
 
 ```bash
-platform variable:update --environment main --value "$(date)" "env:REBUILD_DATE"
+{{% vendor/cli %}} variable:update --environment main --value "$(date)" "env:REBUILD_DATE"
 ```
 
 This forces your application to be built even if no code has changed.
@@ -89,7 +102,7 @@ while that service is experiencing issues.
 To clear the build cache, run the following command:
 
 ```sh
-platform project:clear-build-cache
+{{% vendor/cli %}} project:clear-build-cache
 ```
 
 The next build for each environment is likely to take longer as the cache rebuilds.
@@ -111,9 +124,9 @@ it indicates your application is crashing or unavailable.
 Typical causes and potential solutions include:
 
 - Your app is listening at the wrong place.
-  - Check your app's [upstream properties](../create-apps/app-reference.md#upstream).
+  - Check your app's [upstream properties](../create-apps/app-reference/single-runtime-image.md#upstream).
   - If your app listening at a port, make sure it's using the [`PORT` environment variable](./variables/use-variables.md#use-provided-variables).
-- Your `.platform.app.yaml` configuration has an error and a process isn't starting
+- Your `{{< vendor/configfile "app" >}}` configuration has an error and a process isn't starting
   or requests can't be forwarded to it correctly.
   - Check your `web.commands.start` entry or your `passthru` configuration.
 - The amount of traffic coming to your site exceeds the processing power of your application.
@@ -130,14 +143,14 @@ Typical causes and potential solutions include:
 ## Site outage
 
 If you can't access some part of your project, whether it's the live site, development environment, or Console,
-check the [{{< vendor/name >}} status page](https://status.platform.sh/).
+check the [{{% vendor/name %}} status page](https://status.platform.sh/).
 There you can see planned maintenance and subscribe to updates for any potential outages.
 
-If the status is operational, [contact support](../overview/get-support.md).
+If the status is operational, [contact support](/learn/overview/get-support.md).
 
 ## Command not found
 
-When you've added a command line tool (such as [Drush](../other/glossary.md#drush)),
+When you've added a command line tool (such as [Drush](/glossary.md#drush)),
 you might encounter an error like the following:
 
 ```bash
@@ -157,7 +170,7 @@ Instead, call the app/shell/runtime directly passing your script file to that ex
 
 ## Missing commits
 
-If you push code to {{< vendor/name >}} without the full Git history, sometimes commits are missing.
+If you push code to {{% vendor/name %}} without the full Git history, sometimes commits are missing.
 This can happen if you're pushing code from an external CI/CD pipeline, such as a GitHub action.
 Such pipelines often do only shallow clones by default.
 
@@ -168,13 +181,13 @@ To avoid the error, make sure you do a full clone of the repository before pushi
 For example, for the [Checkout GitHub action](https://github.com/actions/checkout),
 set `fetch-depth: 0` to clone the full history.
 For GitLab, set clones to have a limit of `0` either in [repository settings](https://docs.gitlab.com/ee/ci/pipelines/settings.html#limit-the-number-of-changes-fetched-during-clone)
-or using the [`GIT_DEPTH` variable](https://docs.gitlab.com/ee/ci/large_repositories/index.html#shallow-cloning).
+or using the [`GIT_DEPTH` variable](https://docs.gitlab.com/ee/user/project/repository/monorepos/index.html#shallow-cloning).
 
 ## Large JSON file upload failing
 
 When trying to upload a large JSON file to your API, you might see a 400 response code (`Malformed request`).
 
-{{< vendor/name >}} enforces a 10&nbsp;MB limit on files with the `application/json` `Content-Type` header.
+{{% vendor/name %}} enforces a 10&nbsp;MB limit on files with the `application/json` `Content-Type` header.
 To send large files, use the `multipart/form-data` header instead:
 
 ```bash
@@ -201,14 +214,14 @@ If you attempt to write to disk outside a `build` hook, you may encounter a `rea
 Except where you define it, the file system is all read-only, with code changes necessary through git.
 This gives you benefits like repeatable deployments, consistent backups, and traceability.
 
-To generate anything you need later, [write to disk during a `build` hook](../create-apps/app-reference.md#writable-directories-during-build).
-Or [declare mounts](../create-apps/app-reference.md#mounts),
+To generate anything you need later, [write to disk during a `build` hook](/create-apps/app-reference/single-runtime-image.md#writable-directories-during-build).
+Or [declare mounts](/create-apps/app-reference/single-runtime-image.md#mounts),
 which are writable even during and after deploy.
 They can be used for your data: file uploads, logs, and temporary files.
 
-### Git push fails due to lack of disk space
+### {{% vendor/name %}} push fails due to lack of disk space
 
-You might see the following message when attempting to run `git push`:
+You might see the following message when attempting to run `{{% vendor/cli %}} push`:
 `There isn't enough free space to complete the push`
 
 This usually indicates that large files are present in the repository (where they shouldn't be).
@@ -217,7 +230,7 @@ Make sure that the paths for files like media files, dependencies, and databases
 If large files are already in the repository, the open-source tool [bfg-repo-cleaner](https://rtyley.github.io/bfg-repo-cleaner/)
 can help in cleaning up the repository by purging older commits, removing unnecessary files, and more.
 
-If none of these suggestions work, create a [support ticket](https://console.platform.sh/-/users/~/tickets/open).
+If none of these suggestions work, open a [support ticket](/learn/overview/get-support).
 
 ## Stuck build or deployment
 
@@ -234,7 +247,6 @@ If the activity has the result `success`, the build has completed successfully a
 If the result is still `running`, the build is stuck.
 
 In most regions, stuck builds terminate after one hour.
-To have the build killed in [legacy regions](./regions.md#legacy-regions), create a [support ticket](https://console.platform.sh/-/users/~/tickets/open).
 
 When a deployment is blocked, you should try the following:
 
@@ -245,7 +257,7 @@ When a deployment is blocked, you should try the following:
 
 If a `sync` of `activate` process is stuck, try the above on the parent environment.
 
-Note that, for PHP apps, 
+Note that, for PHP apps,
 you can [restart processes that get stuck during a build or deployment](../languages/php/troubleshoot.md#restart-php-processes-stuck-during-a-build-or-deployment)
 from your app container.
 
@@ -279,7 +291,7 @@ strace -T {{< variable "YOUR_HOOK_COMMAND" >}} # Print a system call report
 
 ### Cron jobs
 
-Containers can't be shutdown while long-running [cron jobs and scheduled tasks](../create-apps/app-reference.md#crons) are active.
+Containers can't be shutdown while long-running [cron jobs and scheduled tasks](/create-apps/app-reference/single-runtime-image.md#crons) are active.
 That means long-running cron jobs block a container from being shut down to make way for a new deploy.
 
 Make sure your custom cron jobs run quickly and properly.
@@ -299,7 +311,7 @@ and [cookie entry](../define-routes/cache.md#cookies).
 Because the router cache follows cache headers from your app,
 your app needs to send the correct `cache-control` header.
 
-For static assets, set cache headers using the `expires` key in your [app configuration](../create-apps/app-reference.md#locations).
+For static assets, set cache headers using the `expires` key in your [app configuration](/create-apps/app-reference/single-runtime-image.md#locations).
 
 ## Language-specific troubleshooting
 

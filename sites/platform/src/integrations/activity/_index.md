@@ -2,12 +2,13 @@
 title: "Activity scripts"
 weight: -5
 description: |
-  {{< vendor/name >}} supports custom scripts that can fire in response to any activity. These scripts allow you to take arbitrary actions in response to actions in your project, such as when it deploys, when a new branch is created, etc.
+  {{% vendor/name %}} supports custom scripts that can fire in response to any activity. These scripts allow you to take arbitrary actions in response to actions in your project, such as when it deploys, when a new branch is created, etc.
+layout: single
 ---
 
 {{% description %}}
 
-Check out examples from other users on the {{< vendor/name >}}[Community site](https://community.platform.sh/c/activity-scripts/10).
+Check out examples from other users on the {{% vendor/name %}} [Community site](https://community.platform.sh/c/activity-scripts/10).
 
 ## Installing
 
@@ -15,10 +16,10 @@ Activity scripts are configured as integrations.
 That means they're at the *project level*, not at the level of an individual environment.
 While you can store the scripts in your Git repository for access, they have no effect there.
 
-To install a new activity script, use the [{{< vendor/name >}} CLI](/administration/cli/_index.md).
+To install a new activity script, use [`integration:add` command](/administration/cli/reference.md#integrationadd) from the [{{% vendor/name %}} CLI](/administration/cli/_index.md).
 
 ```bash
-platform integration:add --type script --file ./my_script.js
+{{% vendor/cli %}} integration:add --type script --file ./my_script.js
 ```
 
 That installs and enables the `my_script.js` file as an activity script on the current project.
@@ -33,7 +34,7 @@ To update an existing activity script, follow these steps:
 1. Get the activity script's ID by running the following command:
 
    ```bash
-   platform integrations
+   {{% vendor/cli %}} integrations
    ```
 
    This returns something like the following:
@@ -51,15 +52,15 @@ To update an existing activity script, follow these steps:
 2. Update the integration by running the following command:
 
    ```bash
-   platform integration:update --file ./my_script.js {{<variable "SCRIPT_ID" >}}
+   {{% vendor/cli %}} integration:update --file ./my_script.js {{<variable "SCRIPT_ID" >}}
    ```
 
-   That updates the integration in place, permanently overwriting the previous version.
+   This [`integration:update` command](/administration/cli/reference.md#integrationupdate) updates the integration in place, permanently overwriting the previous version.
 
-3. Test the activity script update by triggering a redeployment with the following command:
+3. Test the activity script update by [triggering a redeployment](/administration/cli/reference.md#environmentredeploy) with the following command:
 
    ```bash
-   platform redeploy
+   {{% vendor/cli %}} redeploy
    ```
 
 ## Removing
@@ -69,7 +70,7 @@ To disable an activity script, follow these steps:
 1. Get the activity script's ID by running the following command:
 
    ```bash
-   platform integrations
+   {{% vendor/cli %}} integrations
    ```
 
    This returns something like the following:
@@ -84,10 +85,10 @@ To disable an activity script, follow these steps:
    +---------------+--------------+--------------+
    ```
 
-2. Delete the integration by running the following command:
+2. [Delete the integration](/administration/cli/reference.md#integrationdelete) by running the following command:
 
    ```bash
-   platform integration:delete {{<variable "SCRIPT_ID" >}}
+   {{% vendor/cli %}} integration:delete {{<variable "SCRIPT_ID" >}}
    ```
 
 ## Debugging
@@ -95,7 +96,7 @@ To disable an activity script, follow these steps:
 Get activity logs by running the following command:
 
 ```bash
-platform integration:activities
+{{% vendor/cli %}} integration:activities
 ```
 
 Every time your activity script runs it generates a new log entry, including the output from the script.
@@ -118,17 +119,18 @@ That trigger is configurable via command line switches when adding or updating a
 For example, to have a script trigger any time an environment is activated or deactivated, run:
 
 ```bash
-platform integration:update --events='environment.activate, environment.deactivate' {{<variable "SCRIPT_ID" >}}
+{{% vendor/cli %}} integration:update --events='environment.activate,environment.deactivate' {{<variable "SCRIPT_ID" >}}
 ```
 
-A complete list of possible events is available in the [webhook documentation](/integrations/activity/reference.md).
+A complete list of possible events is available in the [Activity script type documentation](/integrations/activity/reference.md#type).
+Any of those Activity Script types can be added to the `--events=event1,event2,...` option.
 
-Scripts can also trigger only when an action reaches a given state, such as `pending`, `in_progress`, or `complete`.
-The default is only when they reach "complete".
+Scripts can also trigger only when an action reaches a [given state](/integrations/activity/reference.md#state), such as `pending`, `in_progress`, `complete`, `cancelled`, or `scheduled`.
+The default is only when they reach `complete`.
 To have a script execute when a synchronize action first starts, for example, you would run:
 
 ```bash
-platform integration:update --events=environment.synchronize --states=in_progress {{<variable "SCRIPT_ID" >}}
+{{% vendor/cli %}} integration:update --events=environment.synchronize --states=in_progress {{<variable "SCRIPT_ID" >}}
 ```
 
 It's also possible to restrict scripts to certain environments by name.
@@ -137,13 +139,66 @@ Most commonly, that's used to have them execute only for your production environ
 The following example executes only for backup actions on the `production` environment:
 
 ```bash
-platform integration:update --events=environment.backup --environments=production {{<variable "SCRIPT_ID" >}}
+{{% vendor/cli %}} integration:update --events=environment.backup --environments=production {{<variable "SCRIPT_ID" >}}
 ```
-
-There is also an `--exclude-environments` switch to excluded environments by name rather than allow.
 
 As a general rule, it's better to have an activity script only execute on the specific events and branches you're interested in
 rather than firing on all activities and then filtering out undesired use cases in the script itself.
+
+## Activity script variables
+
+Some activities don't have access to [project and environment variables](/development/variables/_index.md#variable-types).
+In this case, to avoid hardcoding sensitive variables (such as API tokens) and therefore prevent security breaches,
+add a variable to your activity script.
+
+You can add activity script variables through the {{% vendor/name %}} CLI.
+Activity script variables are only visible in the activity script itself,
+inside the `variables` variable.
+
+### Add an activity script variable
+
+To add a variable to your activity script at the integration level,
+use the following `POST` request:
+
+```bash
+POST /api/projects/{{< variable "PROJECT_ID" >}}/integrations/{{< variable "INTEGRATION_ID" >}}/variables
+```
+
+You get a payload similar to the following:
+
+```json
+{
+  "name": "string",
+  "attributes": {
+    "property1": "string",
+    "property2": "string"
+  },
+  "value": "string",
+  "is_json": true,
+  "is_sensitive": true
+}
+```
+
+### Delete or patch an activity script variable
+
+To delete an activity script variable,
+use the following `DELETE` request:
+
+```
+DELETE /api/projects/{{< variable "PROJECT_ID" >}}/integrations/{{< variable "INTEGRATION_ID" >}}/variables
+```
+
+You can also patch your activity script variable.
+To do so, send the same request using the `PATCH` method instead of the `DELETE` one.
+
+### List an activity script variable
+
+To list all your activity script variables at the integration level,
+use the following `GET` request:
+
+```
+GET /api/projects/{{< variable "PROJECT_ID" >}}/integrations/{{< variable "INTEGRATION_ID" >}}/variables
+```
 
 ## Available APIs
 
@@ -159,7 +214,7 @@ See [Underscore's documentation](https://underscorejs.org/) for available functi
 ### `activity`
 
 Every activity script has a global variable `activity` that contains detailed information about the activity,
-including embedded, JSON-ified versions of the routes configuration and relevant `.platform.app.yaml` files.
+including embedded, JSON-ified versions of the routes configuration and relevant `{{< vendor/configfile "app" >}}` files.
 The `activity` variable is the same as the [webhook payload](/integrations/activity/webhooks.md).
 See the documentation there for details and a complete example.
 
@@ -174,15 +229,15 @@ An example of this object is below:
 ```json
 {
   "attributes": {},
-  "created_at": "2020-04-15T19:50:09.514267+00:00",
+  "created_at": "2024-03-15T19:50:09.514267+00:00",
   "default_domain": null,
   "description": "",
-  "id": "kpyhl5f8nuzef",
+  "id": "azertyuiopqsdfghjklm",
   "owner": "...",
-  "region": "eu-3.platform.sh",
+  "region": "eu-1.{{< vendor/urlraw "host" >}}",
   "repository": {
     "client_ssh_key": "ssh-rsa ...",
-    "url": "kqyhl5f5nuzky@git.eu-3.platform.sh:kqyhl5f5nuzky.git"
+    "url": "azertyuiopqsdfghjklm@git.eu-1.{{< vendor/urlraw "host" >}}:kqyhl5f5nuzky.git"
   },
   "status": {
     "code": "provisioned",
@@ -212,7 +267,7 @@ The API is similar to the JavaScript `LocalStorage` API.
 
 ```javascript
 // Access the storage API.
-It isn't pre-required.
+// It isn't pre-required.
 var storage = require("storage");
 
 // Retrieve a stored value. If the value isn't set it will return null.
@@ -313,5 +368,3 @@ HMAC(HMAC(HMAC(HMAC("AWS4" + kSecret,"20150830"),"us-east-1"),"iam"),"aws4_reque
 ```
 
 > Example taken from the [AWS documentation for signing API requests](https://docs.aws.amazon.com/general/latest/gr/sigv4-calculate-signature.html).
-
-## Further reading

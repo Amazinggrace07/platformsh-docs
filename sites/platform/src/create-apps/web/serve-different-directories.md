@@ -11,10 +11,10 @@ For example, in Git you might have a folder for your app and another folder that
 Your entire Git repository might look like the following:
 
 ```text
-.platform/
-  routes.yaml
-  services.yaml
-.platform.app.yaml
+{{% vendor/configdir %}}/
+  {{< vendor/configfile "routes" "strip" >}}
+  {{< vendor/configfile "services" "strip" >}}
+  {{< vendor/configfile "apps" "strip" >}}
 application/
   [app-code-files]
 docs-src/
@@ -25,20 +25,20 @@ And your build process might build the documentation with an output folder such 
 
 If so, you can serve all requests by your app code except for those that start with `/docs`,
 which you serve with your generated docs.
-Use a [`web` configuration](../app-reference.md#web) similar to the following:
+Use a [`web` configuration](/create-apps/app-reference/single-runtime-image.md#web) similar to the following:
 
-```yaml
+```yaml {configfile="app"}
 web:
-    locations:
-        '/':
-            passthru: true
-        '/docs':
-            root: 'docs-public'
-            index:
-                - "index.html"
-            expires: 24h
-            scripts: false
-            allow: true
+  locations:
+    '/':
+        passthru: true
+    '/docs':
+      root: 'docs-public'
+      index:
+        - "index.html"
+      expires: 24h
+      scripts: false
+      allow: true
 ```
 
 This way, your app can safely coexist with static files as if it were a single site hierarchy.

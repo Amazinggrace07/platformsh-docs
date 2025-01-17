@@ -3,8 +3,10 @@ title: "Performance tuning"
 weight: 3
 ---
 
+{{% composable/disclaimer %}}
+
 Once your app is up and running it still needs to be kept fast.
-{{< vendor/name >}} offers a wide degree of flexibility in how PHP behaves,
+{{% vendor/name %}} offers a wide degree of flexibility in how PHP behaves,
 but that does mean you may need to take a few steps to ensure your site is running optimally.
 
 The following recommendations are guidelines only.
@@ -16,7 +18,7 @@ To make a PHP-based site run faster, the first step is to upgrade the PHP versio
 Upgrading the PHP version might require changes to your app.
 For more details and recommendations, see the [PHP migration guides](https://www.php.net/manual/en/migration80.php).
 
-To change your PHP version, change the [`type` in your app configuration](../../create-apps/app-reference.md#types).
+To change your PHP version, change the [`type` in your app configuration](/create-apps/app-reference/single-runtime-image.md#types).
 Before merging to production, test the change on a branch and make sure that your app is working as expected.
 
 ## Optimize the FPM worker count
@@ -50,13 +52,12 @@ you need to clear the OPcache explicitly on deployment (which can be done by res
 
 To enable preloading, add a variable that specifies a preload script:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 variables:
-    php:
-        opcache.preload: '{{< variable "PRELOAD_SCRIPT" >}}'
+  php:
+    opcache.preload: '{{< variable "PRELOAD_SCRIPT" >}}'
 ```
-
-`{{< variable "PRELOAD_SCRIPT" >}}` is a file path relative to the [app root](../../create-apps/app-reference.md#root-directory).
+`{{< variable "PRELOAD_SCRIPT" >}}` is a file path relative to the [app root](/create-apps/app-reference/single-runtime-image.md#root-directory).
 It may be any PHP script that calls `opcache_compile_file()`.
 
 The following example uses a `preload.php` file as the preload script.
@@ -90,8 +91,8 @@ the cache becomes less effective because it starts [thrashing](https://en.wikipe
 To determine the maximum number of files to cache, follow these steps:
 
 1. Connect to the container via SSH using the [CLI](../../development/ssh/_index.md)
-   by running `platform ssh`.
-2. Determine roughly how many `.php` files your app has by running this command from [your app root](../../create-apps/app-reference.md#root-directory):
+   by running `{{% vendor/cli %}} ssh`.
+2. Determine roughly how many `.php` files your app has by running this command from [your app root](/create-apps/app-reference/single-runtime-image.md#root-directory):
 
    ```bash
    find . -type f -name '*.php' | wc -l
@@ -105,12 +106,11 @@ To determine the maximum number of files to cache, follow these steps:
 
 An example configuration:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 variables:
-    php:
-        'opcache.max_accelerated_files': 22000
+  php:
+    'opcache.max_accelerated_files': 22000
 ```
-
 #### Set memory consumption
 
 `opcache.memory_consumption` is the total memory (in megabytes) that OPcache can use with FastCGI.
@@ -122,7 +122,7 @@ Determining the optimal limit to memory consumption requires executing code via 
 To determine the total amount of memory to use, follow these steps:
 
 1. Connect to the container via SSH using the [CLI](../../development/ssh/_index.md)
-   by running `platform ssh`.
+   by running `{{% vendor/cli %}} ssh`.
 2. Change to the `/tmp` directory (or any other non-web-accessible writable directory) with `cd /tmp`.
 3. Download CacheTool with `curl -sLO https://github.com/gordalina/cachetool/releases/latest/download/cachetool.phar`.
 4. Make CacheTool executable with `chmod +x cachetool.phar`.
@@ -148,12 +148,11 @@ To determine the total amount of memory to use, follow these steps:
 
    An example configuration:
 
-   ```yaml {location=".platform.app.yaml"}
-   variables:
-       php:
-           'opcache.memory_consumption': 96
-   ```
-
+```yaml {configFile="app"}
+variables:
+  php:
+    'opcache.memory_consumption': 96
+```
 8. [Restart PHP-FPM](#restart-php-fpm) and make sure that OPcache works as expected by rerunning CacheTool
    with the following command:
 
@@ -175,12 +174,11 @@ you can disable that check and get a small performance improvement.
 
 Timestamp validation can be disabled by adding the following variable to your [app configuration](../../create-apps/_index.md):
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 variables:
-    php:
-        'opcache.validate_timestamps': 0
+  php:
+    'opcache.validate_timestamps': 0
 ```
-
 When you have disabled OPcache timestamp validation,
 you need to explicitly clear OPcache on deployment by [restarting PHP-FPM](#restart-php-fpm).
 
@@ -191,7 +189,7 @@ Doing so would prevent updates to the generated code from being loaded.
 
 To force a restart of PHP-FPM:
 
-1. Connect to your app container via SSH using the [CLI](../../development/ssh/_index.md) by running `platform ssh`.
+1. Connect to your app container via SSH using the [CLI](../../development/ssh/_index.md) by running `{{% vendor/cli %}} ssh`.
 2. Run `pkill -f -u "$(whoami)" php-fpm`.
 
 ## Optimize your code
@@ -199,7 +197,9 @@ To force a restart of PHP-FPM:
 To optimize your app, consider using a [profiler](../../increase-observability/integrate-observability/_index.md).
 A profiler helps determine what slow spots can be found and addressed and helps improve performance.
 
-The web agency [Pixelant](https://www.pixelant.net/) has released a [log analyzer tool for {{< vendor/name >}}](https://github.com/pixelant/platformsh-analytics)
+<!-- @todo: awesome-platformsh -->
+<!-- @todo: what is the Upsun equivalent/application? -->
+The web agency [Pixelant](https://www.pixelant.net/) has released a [log analyzer tool for {{% vendor/name %}}](https://github.com/pixelant/platformsh-analytics)
 that offers visualization of access logs to determine how much memory requests are using on average.
 It also offers additional insights into the operation of your site and can suggest places to further optimize your configuration or when it's time to increase your plan size.
-Note that this tool is maintained by a third party, not by {{< vendor/name >}}.
+Note that this tool is maintained by a third party, not by {{% vendor/name %}}.

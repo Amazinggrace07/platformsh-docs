@@ -1,11 +1,11 @@
 ---
 title: Pricing
 weight: 3
-description: See the basics of the plans {{< vendor/name >}} offers and how to adjust them.
+description: See the basics of the plans {{% vendor/name %}} offers and how to adjust them.
 layout: single
 ---
 
-{{< vendor/name >}} offers a variety of plans to fit your needs, including a free trial.
+{{% vendor/name %}} offers a variety of plans to fit your needs, including a free trial.
 
 Full pricing information is available at https://platform.sh/pricing/.
 The resources listed there are for [production environments](#production-environments).
@@ -40,15 +40,17 @@ choose [another plan](../pricing/_index.md) to go live.
 Production environments are the live environments available to your users.
 Each Production plan has one Production environment that can be mapped to a [custom domain name](../../domains/steps/_index.md).
 
-The Production environment has more resources than the project's development environments.
+The production environment has more resources than the project's preview environments.
 See the main [pricing page](https://platform.sh/pricing) for the resources available per plan for Production environments.
 
-### Development environments
+### Preview environments
 
-Development environments can't be mapped to [custom domain names](../../domains/steps/_index.md).
-Their resources are separate from Production environments.
+Preview environments can't use the same custom domain as a production environment.
+Instead, you can set up specific [custom domains for each of your preview environments](../../domains/steps/custom-domains-preview-environments.md).
 
-App containers on development environments default to a size of {{< partial "plans/default-dev-env-size" >}}.
+Preview environments use resources that are separate from production environments.
+
+App containers on preview environments default to a size of {{< partial "plans/default-dev-env-size" >}}.
 If you have the [manage plans permission](../users.md#organization-permissions),
 you can increase the size to match your production environment.
 To do so, follow these steps:
@@ -81,18 +83,18 @@ you're billed around 1/3 of the current price for a full month.
 You can add the following extras:
 
 * Users -- for an additional fee per user, except at certain [agency levels](#agencies).
-* Environments -- extra staging/development environments can be added in multiples of 3.
+* Environments -- extra preview environments can be added in multiples of 3.
 * Storage -- extra storage can be added for a fee per 5&nbsp;GB per environment.
-  So if you have added 3 additional environments for a total of 6 development environments,
+  So if you have added 3 additional environments for a total of 6 preview environments,
   the fee is multiplied by 6.
   To ensure environments are available on demand, the fee applies to all environments you have added
   even if you aren't currently actively using them.
 
   You can make any changes up to 100&nbsp;GB yourself.
-  For storage over 100&nbsp;GB, create a [support ticket](https://console.platform.sh/-/users/~/tickets).
+  For storage over 100&nbsp;GB, open a [support ticket](/learn/overview/get-support).
 
   You currently can't reduce your storage on your own for technical reasons.
-  If you need to reduce storage, create a [support ticket](https://console.platform.sh/-/users/~/tickets).
+  If you need to reduce storage, open a [support ticket](/learn/overview/get-support).
 
 ## Multiple apps in a single project
 
@@ -107,13 +109,17 @@ with a MySQL service and a Redis service.
 If you aren't sure whether a specific setup would fit into a plan,
 don't hesitate to [contact support](https://console.platform.sh/-/users/~/tickets).
 
+{{< version/only "1" >}}
+
 ## {{% names/dedicated-gen-3 %}}
 
 For more resources along with triple redundancy on every element of the stack, use a {{% names/dedicated-gen-3 %}} plan.
 
-Learn more about [{{% names/dedicated-gen-3 %}}](../../dedicated-gen-3/_index.md).
+Learn more about [{{% names/dedicated-gen-3 %}}](/dedicated-environments/dedicated-gen-3/_index.md).
 
 To discuss how {{% names/dedicated-gen-3 %}} could work for you, [contact Sales](https://platform.sh/contact/).
+
+{{< /version/only >}}
 
 ## Enterprise overages
 
@@ -135,9 +141,10 @@ Plans with a Fastly CDN service or the extra Fastly Service include the followin
 
 | SKU             | Description                                                                             | USD  | EUR  | AUD    | CAD    | GBP  |
 |-----------------|-----------------------------------------------------------------------------------------|------|------|--------|--------|------|
-| `BDW-1-POST`    | Additional 1&nbsp;TB of egress bandwidth and 50 million ingress requests               | $88  | €77  | AU$128 | CA$119 | £68  |
-| `EDGE-REQ-POST` | Additional 50 million ingress requests                                                  | $66  | €62  | AU$95  | CA$88  | £54  |
-| `ORN-1-POST`    | Additional 1&nbsp;TB of egress bandwidth and 50 million ingress requests at the origin | $209 | €167 | AU$316 | CA$284 | £189 |
+| `EDGE-ORN-OVERAGE-1TB`    | Origin Egress Bandwidth: 1TB               | $209  | €155  | AU$303 | CA$284 | £161  |
+| `EDGE-BDW-OVERAGE-1TB`    | Edge Egress Bandwidth: 1TB               | $88  | €65  | AU$128 | CA$119 | £68  |
+| `EDGE-REQ-OVERAGE-50M`    | Ingress Requests: 50M               | $66  | €49  | AU$96 | CA$90 | £51  |
+
 
 ### DDoS surge protection
 
@@ -146,7 +153,7 @@ You can contact your Customer Success Manager to add DDoS surge protection to yo
 
 | SKU                    | Description                                | USD    | EUR    | AUD      | CAD      | GBP    |
 |------------------------|--------------------------------------------|--------|--------|----------|----------|--------|
-| `EDGE-DDOS-PROTECTION` | Surge protection for DDoS related overages | $2,400 | €2,220 | AU$3,444 | CA$3,216 | £1,968 |
+| `EDGE-DDOS-PROTECTION` | Surge protection for DDoS related overages | $2,400 | €1778 | AU$3,480 | CA$3,257 | £1,847 |
 
 ## Agencies
 
@@ -180,8 +187,14 @@ If you have any questions, don't hesitate to [contact Sales](https://platform.sh
 
 ## Sponsored sites
 
-{{< vendor/name >}} provides sponsored hosting for Free Software projects, tech community events and organizations as part of our effort to support the Free Software community. 
-That offering can include either a project on {{< vendor/name >}}, or profilable environments through Blackfire.io, depending on the needs of the project. 
+{{% vendor/name %}} provides sponsored hosting for Free Software projects, tech community events and organizations as part of our effort to support the Free Software community. 
+That offering can include either a project on {{% vendor/name %}}, or profilable environments through Blackfire.io, depending on the needs of the project. 
+
+## Dunning process
+
+In instances where a payment has failed, {{% vendor/name %}} will make three separate attempts to take the outstanding balance from your account. 
+
+These attempts will be made on the 4th, 11th and 15th of the month. If your payment fails after the third attempt, your projects will be suspended the following day. All projects on the billing subscription will be affected.  
 
 <div align="center">
 

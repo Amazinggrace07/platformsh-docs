@@ -1,3 +1,4 @@
+<!-- shortcode start {{ .Name }} -->
 {{ $isWordPress := .Get "WordPress" }}
 {{ $isSymfony := .Get "Symfony" }}
 ## Migrate your data
@@ -23,7 +24,7 @@ symfony cloud:sql < dump.sql
 ```
 {{ else }}
 ```bash
-platform sql < dump.sql
+{{ `{{% vendor/cli %}}` | .Page.RenderString }} sql < dump.sql
 ```
 {{ end }}
 
@@ -41,18 +42,18 @@ all of your user files to your local `files/user` directory and your public file
 {{ end }}, but adjust accordingly for their actual locations.
 
 Next, upload your files to your mounts
-using the {{ if $isSymfony }}`symfony cloud:mount:upload`{{ else }}`platform mount:upload`{{ end }} command.
+using the {{ if $isSymfony }}`symfony cloud:mount:upload`{{ else }}`{{ `{{% vendor/cli %}}` | .Page.RenderString }} mount:upload`{{ end }} command.
 Run the following command from your local Git repository root,
 modifying the `--source` path if needed.
 
 {{ if $isWordPress }}
 ```bash
-platform mount:upload --mount wordpress/wp-content/uploads --source ./wordpress/wp-content/uploads
+{{ `{{% vendor/cli %}}` | .Page.RenderString }} mount:upload --mount wordpress/wp-content/uploads --source ./wordpress/wp-content/uploads
 ```
 {{ else }}
 ```bash
-platform mount:upload --mount src/main/resources/files/user --source ./files/user
-platform mount:upload --mount src/main/resources/files/public --source ./files/public
+{{ `{{% vendor/cli %}}` | .Page.RenderString }} mount:upload --mount src/main/resources/files/user --source ./files/user
+{{ `{{% vendor/cli %}}` | .Page.RenderString }} mount:upload --mount src/main/resources/files/public --source ./files/public
 ```
 {{ end }}
 
@@ -64,3 +65,4 @@ You've now added your files and database to your {{ .Site.Params.vendor.name }} 
 When you make a new branch environment off of it,
 all of your data is fully cloned to that new environment
 so you can test with your complete dataset without impacting production.
+<!-- shortcode end {{ .Name }} -->

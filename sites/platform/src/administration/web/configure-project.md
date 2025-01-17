@@ -14,7 +14,7 @@ The settings are divided into several sections.
 
 The **General** section shows you the project's region and allows you to update the project name and [timezone](../../projects/change-project-timezone.md).
 
-![configure project](/images/management-console/settings-general.png "0.7")
+![configure project](/images/management-console/settings-general.png "0.5")
 
 ## Access
 
@@ -40,7 +40,7 @@ See how to [set up your domain](../../domains/steps/_index.md).
 ## Deploy Key
 
 The **Deploy Key** section shows you the public SSH key you can add to your private repositories.
-Adding it lets {{< vendor/name >}} access the repositories during the build process.
+Adding it lets {{% vendor/name %}} access the repositories during the build process.
 This is useful if you want to reuse some code components across multiple projects and manage those components as dependencies of your project.
 
 ![Project deploy key](/images/management-console/settings-deploy-key.png "0.7")

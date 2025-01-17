@@ -1,33 +1,34 @@
 ---
 title: "Extensions"
 weight: 1
-description: See what PHP extensions are available with each PHP version on {{< vendor/name >}}.
+description: See what PHP extensions are available with each PHP version on {{% vendor/name %}}.
 ---
 
-PHP has a number of [extensions](https://pecl.php.net/) developed by members of the community.
-Some of them are available for {{< vendor/name >}} containers.
+{{% composable/disclaimer %}}
 
-{{< note >}}
+PHP has a number of [extensions](https://pecl.php.net/) developed by members of the community.
+Some of them are available for {{% vendor/name %}} containers.
+
+{{< note version="1" theme="warning" title="Warning" >}}
 
 The information on this page applies to Grid and {{% names/dedicated-gen-3 %}} plans.
-See also [PHP extensions on {{% names/dedicated-gen-2 %}} plans](../../dedicated-gen-2/overview/grid.md#extensions).
+See also [PHP extensions on {{% names/dedicated-gen-2 %}} plans](/dedicated-environments/dedicated-gen-2/environment-differences.md#extensions).
 
 {{< /note >}}
 
 You can define the PHP extensions you want to enable or disable:
 
-```yaml {location=".platform.app.yaml"}
+```yaml {configFile="app"}
 runtime:
-    extensions:
-        - raphf
-        - http
-        - igbinary
-        - redis
-    disabled_extensions:
-        - sqlite3
+  extensions:
+    - raphf
+    - http
+    - igbinary
+    - redis
+  disabled_extensions:
+    - sqlite3
 ```
-
-You can also [include configuration options](../../create-apps/app-reference.md#extensions) for specific extensions.
+You can also [include configuration options](/create-apps/app-reference/single-runtime-image.md#extensions) for specific extensions.
 
 The following table shows all extensions that are available (Avail) and on by default (Def).
 You can turn on the available ones with the `extensions` key
@@ -56,7 +57,7 @@ Some built-in modules are always on:
 To see a complete list of the compiled PHP extensions, run the following [CLI command](../../administration/cli/_index.md):
 
 ```bash
-platform ssh "php -m"
+{{% vendor/cli %}} ssh "php -m"
 ```
 
 ## Custom PHP extensions
@@ -69,11 +70,11 @@ but it takes slightly more work:
    but committing large binary blobs to Git is generally not recommended.
 
 2. Load the extension using an absolute path by [customizing the PHP settings](./_index.md#customize-php-settings)
-   For example, if the extension is named `spiffy.so` and is in your [app root](../../create-apps/app-reference.md#root-directory),
+   For example, if the extension is named `spiffy.so` and is in your [app root](/create-apps/app-reference/single-runtime-image.md#root-directory),
    your configuration looks like the following:
 
-   ```yaml {location=".platform.app.yaml"}
-   variables:
-       php:
-           extension: /app/spiffy.so
-   ```
+```yaml {configFile="app"}
+variables:
+  php:
+    extension: /app/spiffy.so
+```

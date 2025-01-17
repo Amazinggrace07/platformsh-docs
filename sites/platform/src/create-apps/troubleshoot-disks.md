@@ -1,8 +1,9 @@
 ---
 title: "Troubleshoot disks"
+weight: 10
 ---
 
-{{% troubleshoot %}}
+For more general information, see how to [troubleshoot development](/development/troubleshoot).
 
 ## Exceeding plan storage limit
 
@@ -10,8 +11,8 @@ Professional plans come with a default amount of storage that you can [change wi
 The storage is allocated among your services and applications using the `disk` parameter in their configuration files.
 
 You might accidentally set the sum of all `disk` parameters in the files to exceed your plans storage limit.
-For example, by setting `disk: 4096` for a MySQL service in `services.yaml`
-and `disk: 4096` in `.platform.app.yaml` for a plan with a 5&nbsp;GB storage limit.
+For example, by setting `disk: 4096` for a MySQL service in `{{< vendor/configfile "services" >}}`
+and `disk: 4096` in `{{< vendor/configfile "app" >}}` for a plan with a 5&nbsp;GB storage limit.
 
 In such cases, you get an error like the following:
 
@@ -22,7 +23,7 @@ Error: Resources exceeding plan limit; disk: 8192.00MB > 5120.00MB; try removing
 To fix the error, do one of the following:
 
 * Lower the `disk` parameters to a value within your plan's storage limits.
-  Note the [limits to downsizing disks](./app-reference.md#downsize-a-disk).
+  Note the [limits to downsizing disks](/create-apps/app-reference/single-runtime-image.md#downsize-a-disk).
 * Increase your plan's storage limits.
   This can only be done by people with the [manage plans permission](../administration/users.md#organization-permissions).
 
@@ -39,7 +40,7 @@ To solve this issue:
 
 ### Check your database disk space
 
-To get approximate disk usage for a database, run the command `platform db:size`.
+To get approximate disk usage for a database, run the command `{{% vendor/cli %}} db:size`.
 This returns an estimate such as the following:
 
 ```text
@@ -59,7 +60,7 @@ If you find that your application or service is running out of disk space,
 you can increase the available storage.
 
 To increase the space available for applications and services,
-use the `disk` keys in your `.platform.app.yaml` and `.platform/services.yaml` files.
+use the `disk` keys in your `{{< vendor/configfile "app" >}}` and `{{< vendor/configfile "services" >}}` files.
 The sum of all `disk` keys can't exceed the available storage in your plan.
 
 If you need more storage to fit the sum of all `disk` keys, increase your plan's storage limits.
@@ -74,11 +75,11 @@ W: [Errno 28] No space left on device: ...
 ```
 
 This is caused by the amount of disk provided to the build container before deployment.
-Application images are restricted to 4&nbsp;GB during build, no matter how much writable disk has been set aside for the deployed application.
+Application images are restricted to 8&nbsp;GB during build, no matter how much writable disk has been set aside for the deployed application.
 
 Some build tools (yarn/npm) store cache for different versions of their modules.
 This can cause the build cache to grow over time beyond the maximum.
 Try [clearing the build cache](../development/troubleshoot.md#clear-the-build-cache) and [triggering a redeploy](../development/troubleshoot.md#force-a-redeploy).
 
-If for some reason your application absolutely requires more than 4&nbsp;GB during build,
-you can open a support ticket to have this limit increased.
+If for some reason your application absolutely requires more than 8&nbsp;GB during build,
+you can open a [support ticket](/learn/overview/get-support) to have this limit increased.
